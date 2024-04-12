@@ -19,8 +19,8 @@ regions <- c("amz")
 for(i in 1:length(regions)) {
 
   file.data.raw <- paste0(path.fl, regions[i], ".1722.vars.csv")
-  file.covid.adm0 <- paste0(path.cv, regions[i], ".covid_mort.adm0.gpkg")
   file.covid.adm1 <- paste0(path.cv, regions[i], ".covid_mort.adm1.gpkg")
+  file.cabinets <- paste0(path.raw, regions[i], ".cabinets.csv")
   file.data.int <- paste0(path.int, regions[i], ".data.int.rds")
 
   vars <- fread(file.data.raw, 
@@ -71,7 +71,7 @@ for(i in 1:length(regions)) {
     _[, .SD[sample(1:.N, 1e6)], by = "year"] 
 
 
-
+  # Include mortality data
 
   covid <-
     st_read(file.covid.adm1) |>
@@ -110,8 +110,32 @@ for(i in 1:length(regions)) {
   data.int.covid <- rbind(data.int.nosub, data.int.sub)
   data.int.covid[is.na(mort), mort := 0]
 
-  setkey(data.int.covid, id)
-  setcolorder(data.int.covid,
+  
+  # Include political administrations
+
+  cabinets <- fread(file.cabinets)
+
+  # Truncate to study period and expand
+  cabinets[is.na(end) | end > 2022, end := 2022]
+  cabinets[start < 2017, start := 2017]
+  cabinets <-
+    cabinets[, .SD[rep(1, end - start + 1),
+                   .(cabinet,
+                     adm0,
+                     year = seq(start[1], end[1]))],
+             by = .I
+             ][, -"I"]
+
+  data.int.all <-
+    merge(data.int.covid, cabinets,
+          by = c("adm0", "year"))
+
+  data.int.all[,
+               `:=`(adm0 = factor(adm0),
+                    cabinet = factor(cabinet))]
+  
+  setkey(data.int.all, id)
+  setcolorder(data.int.all,
               c("id", "year",
                 "adm0", "adm1",
                 "forestloss", "lossyear",
@@ -119,11 +143,12 @@ for(i in 1:length(regions)) {
                 "it", "it_type", "pa", "pa_type", "overlap",
                 "tri", "dist_set", "dist_roads", "dist_rivers",
                 "dens_roads", "dens_pop",
+                "mort", "cabinet",
                 "lon", "lat",
                 "ed_east", "ed_north", "ea_east", "ea_north"))
 
 
-  saveRDS(data.int.covid, file.data.int)
+  saveRDS(data.int.all, file.data.int)
 
   rm(data.int, vars)
 
