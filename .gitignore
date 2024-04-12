@@ -1,0 +1,9 @@
+data/
+results/
+log/
+models/
+tmp/
+src/scratch.R
+session*.vim
+**/slurm*
+
