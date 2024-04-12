@@ -1,4 +1,5 @@
 library(data.table)
+library(sf)
 
 ## Folders
 path.base <- "../"
@@ -18,6 +19,8 @@ regions <- c("amz")
 for(i in 1:length(regions)) {
 
   file.data.raw <- paste0(path.fl, regions[i], ".1722.vars.csv")
+  file.covid.adm0 <- paste0(path.cv, regions[i], ".covid_mort.adm0.gpkg")
+  file.covid.adm1 <- paste0(path.cv, regions[i], ".covid_mort.adm1.gpkg")
   file.data.int <- paste0(path.int, regions[i], ".data.int.rds")
 
   vars <- fread(file.data.raw, 
@@ -40,7 +43,7 @@ for(i in 1:length(regions)) {
                              levels = c("none", "indirect_use", "direct_use"),
                              ordered = TRUE),
             adm0 = factor(adm0),
-            adm1 = factor(adm0)
+            adm1 = factor(adm1)
             )
        ]
   vars[is.na(it_type), it_type := "none"]
@@ -67,8 +70,48 @@ for(i in 1:length(regions)) {
     na.omit(vars) |>
     _[, .SD[sample(1:.N, 1e6)], by = "year"] 
 
-  setkey(data.int, id)
-  setcolorder(data.int,
+
+
+
+  covid <-
+    st_read(file.covid.adm1) |>
+    st_drop_geometry() |>
+    as.data.table()
+
+  adm.nosub <- covid[is.na(adm1), adm0]
+
+  # CSSE data does not distinguish between Lima the province and Lima the region
+  covid.per.15_1 <- covid[adm1 == "PER.16_1"]
+  covid.per.15_1[,
+                 `:=`(adm.id = nrow(covid) + 1,
+                      adm1 = "PER.15_1",
+                      name1 = "Lima Province")]
+  covid <- rbind(covid, covid.per.15_1)
+
+
+  data.int.nosub <-
+    melt(covid[adm0 %in% adm.nosub,
+               .(adm0, mort_2020,mort_2021, mort_2022)],
+         id.vars = "adm0",
+         measure.vars = measure(value.name, year = as.integer, sep = "_")) |>
+    merge(data.int[adm0 %in% adm.nosub],
+          by = c("adm0", "year"),
+          all.y = TRUE)
+
+  data.int.sub <-
+    melt(covid[adm0 %notin% adm.nosub,
+               .(adm0, adm1, mort_2020,mort_2021, mort_2022)],
+         id.vars = c("adm0", "adm1"),
+         measure.vars = measure(value.name, year = as.integer, sep = "_")) |>
+    merge(data.int[adm0 %notin% adm.nosub],
+          by = c("adm0", "adm1", "year"),
+          all.y = TRUE)
+
+  data.int.covid <- rbind(data.int.nosub, data.int.sub)
+  data.int.covid[is.na(mort), mort := 0]
+
+  setkey(data.int.covid, id)
+  setcolorder(data.int.covid,
               c("id", "year",
                 "adm0", "adm1",
                 "forestloss", "lossyear",
@@ -80,7 +123,7 @@ for(i in 1:length(regions)) {
                 "ed_east", "ed_north", "ea_east", "ea_north"))
 
 
-  saveRDS(data.int, file.data.int)
+  saveRDS(data.int.covid, file.data.int)
 
   rm(data.int, vars)
 
