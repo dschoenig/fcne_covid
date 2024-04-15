@@ -130,11 +130,14 @@ for(i in 1:length(regions)) {
 
   data.int.all[,
                `:=`(adm0 = factor(adm0),
-                    cabinet = factor(cabinet))]
+                    cabinet = factor(cabinet),
+                    pandemic = factor(fifelse(year < 2020, "no", "yes"),
+                                      levels = c("no", "yes")))]
   
   setkey(data.int.all, id)
   setcolorder(data.int.all,
               c("id", "year",
+                "pandemic",
                 "adm0", "adm1",
                 "forestloss", "lossyear",
                 "primary_forest", "for_type",

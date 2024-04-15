@@ -11,7 +11,7 @@ path.data.int <- paste0(path.data, "intermediate/")
 
 path.data.proc <- paste0(path.data, "processed/")
 if(!dir.exists(path.data.proc)){
-  dir.create(path.data, recursive = TRUE)
+  dir.create(path.data.proc, recursive = TRUE)
 }
 
 
