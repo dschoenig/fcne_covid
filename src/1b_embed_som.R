@@ -32,7 +32,6 @@ som.fit <- readRDS(file.som)
 a <- Sys.time()
 
 data.int <- readRDS(file.data.int)
-data.int <- data.int[sample(1:6e6, 1e4)]
 
 embedded <-
   egp_embed(data.int[,
