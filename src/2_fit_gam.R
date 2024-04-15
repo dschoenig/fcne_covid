@@ -33,7 +33,7 @@ model.name <- paste0(model.reg, ".m", model.id)
 k.reg <- list(amz = c(t.bl = 5,
                       loc.bl = 300,
                       loc.mort = 100,
-                      loc.foro = 25,
+                      loc.foro = 50,
                       loc.itpa = 100,
                       loc.ov = 50,
                       som.np = 1000,
