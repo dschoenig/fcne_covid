@@ -30,7 +30,7 @@ for(i in 1:length(regions)) {
             primary_forest = ifelse(primary_forest == "t", TRUE, FALSE),
             for_type = factor(ifelse(primary_forest == "t",
                                      "primary", "other"),
-                              levels = c("other", "primary"),
+                              levels = c("primary", "other"),
                               ordered = TRUE),
             it = ifelse(it == "t", TRUE, FALSE),
             it_type = factor(it_type,
@@ -132,7 +132,8 @@ for(i in 1:length(regions)) {
                `:=`(adm0 = factor(adm0),
                     cabinet = factor(cabinet),
                     pandemic = factor(fifelse(year < 2020, "no", "yes"),
-                                      levels = c("no", "yes")))]
+                                      levels = c("no", "yes"),
+                                      ordered = TRUE))]
   
   setkey(data.int.all, id)
   setcolorder(data.int.all,
