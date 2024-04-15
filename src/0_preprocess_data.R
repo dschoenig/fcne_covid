@@ -23,9 +23,7 @@ for(i in 1:length(regions)) {
   file.cabinets <- paste0(path.raw, regions[i], ".cabinets.csv")
   file.data.int <- paste0(path.int, regions[i], ".data.int.rds")
 
-  vars <- fread(file.data.raw, 
-                na.strings = "",
-                key = "id")
+  vars <- fread(file.data.raw, na.strings = "", key = "id")
 
   vars[, 
        `:=`(forestloss = ifelse(forestloss == "t", TRUE, FALSE),
@@ -68,7 +66,7 @@ for(i in 1:length(regions)) {
   set.seed(18470611)
   data.int <-
     na.omit(vars) |>
-    _[, .SD[sample(1:.N, 1e6)], by = "year"] 
+    _[, .SD[sample(1:.N, 2e6)], by = "year"] 
 
 
   # Include mortality data
