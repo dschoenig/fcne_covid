@@ -33,13 +33,13 @@ model.name <- paste0(model.reg, ".m", model.id)
 k.reg <- list(amz = c(t.bl = 5,
                       loc.bl = 300,
                       loc.mort = 100,
-                      loc.foro = 50,
+                      loc.foro = 25,
                       loc.itpa = 100,
-                      loc.ov = 50,
+                      loc.ov = 25,
                       som.np = 1000,
                       som.p = 500))
 # Increase number of maximum knots 10-fold (default: 2000)
-max.knots.reg <- list(amz = c(
+max.knots.reg <- list(amz = c(t.bl = NULL,
                               loc.bl = 2e4,
                               loc.mort = 2e4,
                               loc.foro = 2e4,
