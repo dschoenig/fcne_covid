@@ -40,11 +40,11 @@ k.reg <- list(amz = c(t.bl = 5,
                       som.p = 500))
 # Increase number of maximum knots 5-fold (default: 2000)
 max.knots.reg <- list(amz = c(t.bl = NULL,
-                              loc.bl = 5e3,
-                              loc.mort = 5e3,
-                              loc.foro = 5e3,
-                              loc.itpa = 5e3,
-                              loc.ov = 5e3,
+                              loc.bl = 1e4,
+                              loc.mort = 1e4,
+                              loc.foro = 1e4,
+                              loc.itpa = 1e4,
+                              loc.ov = 1e4,
                               som.np = 1e4,
                               som.p = 1e4))
 # max.knots.reg <- list(cam = c(k.reg$cam[1:3] * 10, som = 10000),
