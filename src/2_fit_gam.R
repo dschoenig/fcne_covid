@@ -34,7 +34,7 @@ k.reg <- list(amz = c(t.bl = 5,
                       loc.bl = 300,
                       loc.mort = 100,
                       loc.foro = 50,
-                      loc.itpa = 100,
+                      loc.itpa = 150,
                       loc.ov = 50,
                       som.np = 1000,
                       som.p = 500))
@@ -150,7 +150,7 @@ if(model.id == 2) {
         )
 }
 
-if(model.id == 3) {
+if(model.id == 7) {
   model <-
     bam(forestloss ~
         te(ed_east, ed_north, year,
@@ -169,10 +169,6 @@ if(model.id == 3) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = overlap,
-           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.ov),
-                     list(max.knots = max.knots.def$t.bl))) +
         te(ed_east, ed_north, year, by = mort,
            d = c(2,1), k = c(k.def$loc.mort, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.mort),
@@ -181,6 +177,52 @@ if(model.id == 3) {
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)) + 
         s(som_x, som_y, by = pandemic,
+          k = k.def$som.p,
+          xt = list(max.knots.def$som.p)) + 
+        s(cabinet, bs = "re"),
+        family = binomial(link = "cloglog"),
+        data = data.mod,
+        select = TRUE,
+        discrete = max.discrete.bins,
+        nthreads = n.threads,
+        control = gam.control(trace = TRUE, epsilon = conv.eps)
+        )
+}
+
+if(model.id == 8) {
+  model <-
+    bam(forestloss ~
+        te(ed_east, ed_north, year,
+           bs = c("gp", "gp"),
+           d = c(2,1), k = c(k.def$loc.bl, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.bl),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = for_type,
+           bs = c("gp", "gp"),
+           d = c(2,1), k = c(k.def$loc.foro, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.foro),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = it_type,
+           bs = c("gp", "gp"),
+           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.itpa),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = pa_type,
+           bs = c("gp", "gp"),
+           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.itpa),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = mort,
+           bs = c("gp", "gp"),
+           d = c(2,1), k = c(k.def$loc.mort, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.mort),
+                     list(max.knots = max.knots.def$t.bl))) +
+        s(som_x, som_y,
+          bs = "gp",
+          k = k.def$som.np,
+          xt = list(max.knots.def$som.np)) + 
+        s(som_x, som_y, by = pandemic,
+          bs = "gp",
           k = k.def$som.p,
           xt = list(max.knots.def$som.p)) + 
         s(cabinet, bs = "re"),
