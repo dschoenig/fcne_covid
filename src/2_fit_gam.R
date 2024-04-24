@@ -135,7 +135,7 @@ if(model.id == 1) {
 
 if(model.id == 2) {
 # Necessary to model overlapping areas explicitely?
-# Doesn't converge
+# Does not converge
   model <-
     bam(forestloss ~
         te(ed_east, ed_north, year,
@@ -256,6 +256,7 @@ if(model.id == 4) {
 
 if(model.id == 5) {
 # Like 1, but neither mortality effect nor pandemic effect on covariates
+# Does not converge
   model <-
     bam(forestloss ~
         te(ed_east, ed_north, year,
