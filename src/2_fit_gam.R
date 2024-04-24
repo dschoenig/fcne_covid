@@ -31,20 +31,20 @@ file.data.proc <- paste0(path.data.proc, model.reg, ".data.proc.rds")
 model.name <- paste0(model.reg, ".m", model.id)
 
 k.reg <- list(amz = c(t.bl = 5,
-                      loc.bl = 300,
-                      loc.mort = 100,
+                      loc.bl = 500,
                       loc.foro = 100,
                       loc.itpa = 150,
                       loc.ov = 50,
+                      loc.mort = 100,
                       som.np = 1000,
                       som.p = 500))
 # Increase number of maximum knots 5-fold (default: 2000)
 max.knots.reg <- list(amz = c(t.bl = NULL,
                               loc.bl = 1e4,
-                              loc.mort = 1e4,
                               loc.foro = 1e4,
                               loc.itpa = 1e4,
                               loc.ov = 1e4,
+                              loc.mort = 1e4,
                               som.np = 1e4,
                               som.p = 1e4))
 # max.knots.reg <- list(cam = c(k.reg$cam[1:3] * 10, som = 10000),
