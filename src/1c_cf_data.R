@@ -7,7 +7,7 @@ path.base <- "../"
 path.data.proc <- paste0(path.base, "data/processed/")
 
 region <- tolower(as.character(args[1]))
-region <- "amz"
+# region <- "amz"
 
 file.data.proc <- paste0(path.data.proc, region, ".data.proc.rds")
 file.data.cf1 <- paste0(path.data.proc, region, ".data.cf1.rds")
@@ -19,6 +19,7 @@ data <-
   readRDS(file.data.proc) |>
   _[,
     .(year,
+      adm0,
       for_type,
       it_type,
       pa_type,
@@ -37,7 +38,6 @@ data.cf1[,
          `:=`(year = sample(2017:2019, .N, replace = T),
               mort = 0,
               pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
-
 setorder(data.cf1, year)
 data.cf1[,
          `:=`(cf.id = 1:.N,
@@ -75,3 +75,6 @@ saveRDS(data.cf1, file.data.cf1)
 saveRDS(data.cf2, file.data.cf2)
 saveRDS(data.cf3, file.data.cf3)
 saveRDS(data.cf4, file.data.cf4)
+
+
+
