@@ -13,7 +13,7 @@ pred_type <- as.character(args[3])
 
 draws.max <- 1000
 draws.load.chunk <- 100
-draws.eval.chunk <- 100
+draws.eval.chunk <- 10
 
 # n.threads <- 1
 # region <- "amz"
