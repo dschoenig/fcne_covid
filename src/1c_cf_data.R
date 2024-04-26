@@ -26,7 +26,6 @@ data <-
       overlap,
       pandemic,
       mort,
-      cabinet,
       ed_east, ed_north,
       som_x, som_y)]
 
