@@ -67,7 +67,6 @@ data.mod <-
       overlap,
       pandemic,
       mort,
-      cabinet,
       ed_east, ed_north,
       som_x, som_y)]
 # rm(data.proc)
@@ -122,8 +121,7 @@ if(model.id == 1) {
           xt = list(max.knots.def$som.np)) + 
         s(som_x, som_y, by = pandemic,
           k = k.def$som.p,
-          xt = list(max.knots.def$som.p)) + 
-        s(cabinet, bs = "re"),
+          xt = list(max.knots.def$som.p)),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,
@@ -167,8 +165,7 @@ if(model.id == 2) {
           xt = list(max.knots.def$som.np)) + 
         s(som_x, som_y, by = pandemic,
           k = k.def$som.p,
-          xt = list(max.knots.def$som.p)) + 
-        s(cabinet, bs = "re"),
+          xt = list(max.knots.def$som.p)),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,
@@ -204,8 +201,7 @@ if(model.id == 3) {
           xt = list(max.knots.def$som.np)) + 
         s(som_x, som_y, by = pandemic,
           k = k.def$som.p,
-          xt = list(max.knots.def$som.p)) + 
-        s(cabinet, bs = "re"),
+          xt = list(max.knots.def$som.p)),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,
@@ -242,8 +238,7 @@ if(model.id == 4) {
                      list(max.knots = max.knots.def$t.bl))) +
         s(som_x, som_y,
           k = k.def$som.np,
-          xt = list(max.knots.def$som.np)) + 
-        s(cabinet, bs = "re"),
+          xt = list(max.knots.def$som.np)),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,
@@ -277,8 +272,7 @@ if(model.id == 5) {
                      list(max.knots = max.knots.def$t.bl))) +
         s(som_x, som_y,
           k = k.def$som.np,
-          xt = list(max.knots.def$som.np)) + 
-        s(cabinet, bs = "re"),
+          xt = list(max.knots.def$som.np)),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,

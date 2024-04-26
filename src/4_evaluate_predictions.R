@@ -27,7 +27,7 @@ file.post <- paste0(path.gam, region,  ".m1.post.rds")
 
 col.sel <-
   c("year", "for_type", "it_type", "pa_type", "overlap",
-    "pandemic", "mort", "cabinet", "ed_east", "ed_north",
+    "pandemic", "mort", "ed_east", "ed_north",
     "som_x", "som_y")
 
 if(pred_type == "fac") {
