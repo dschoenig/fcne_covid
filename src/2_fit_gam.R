@@ -35,7 +35,7 @@ k.reg <- list(amz = c(t.bl = 5,
                       loc.foro = 100,
                       loc.itpa = 150,
                       loc.ov = 50,
-                      loc.mort = 100,
+                      mort = 100,
                       som.np = 1000,
                       som.p = 500))
 # Increase number of maximum knots 5-fold (default: 2000)
@@ -44,7 +44,7 @@ max.knots.reg <- list(amz = c(t.bl = NULL,
                               loc.foro = 1e4,
                               loc.itpa = 1e4,
                               loc.ov = 1e4,
-                              loc.mort = 1e4,
+                              mort = NULL,
                               som.np = 1e4,
                               som.p = 1e4))
 # max.knots.reg <- list(cam = c(k.reg$cam[1:3] * 10, som = 10000),
@@ -112,10 +112,9 @@ if(model.id == 1) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = mort,
-           d = c(2,1), k = c(k.def$loc.mort, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.mort),
-                     list(max.knots = max.knots.def$t.bl))) +
+        s(mort,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)) + 
@@ -156,10 +155,9 @@ if(model.id == 2) {
            d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = mort,
-           d = c(2,1), k = c(k.def$loc.mort, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.mort),
-                     list(max.knots = max.knots.def$t.bl))) +
+        s(mort,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)) + 
@@ -232,10 +230,9 @@ if(model.id == 4) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = mort,
-           d = c(2,1), k = c(k.def$loc.mort, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.mort),
-                     list(max.knots = max.knots.def$t.bl))) +
+        s(mort,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)),
