@@ -31,19 +31,25 @@ data <-
 
 cf.types <- paste0("cf", 1:4)
 
+
+data.pan <- data[pandemic == "yes"]
+
 set.seed(19360429)
-data.cf1 <- data[pandemic == "yes"]
-data.cf1[, 
-         `:=`(year = sample(2017:2019, .N, replace = T),
-              mort = 0,
-              pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
+year.sam <- sample(2017:2019, nrow(data.pan), replace = T)
+
+data.cf1 <- 
+  copy(data.pan) |>
+  _[, 
+    `:=`(year = year.sam,
+         mort = 0,
+         pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
 setorder(data.cf1, year)
 data.cf1[,
          `:=`(cf.id = 1:.N,
               cf.type = factor("cf1", levels = cf.types))]
 setcolorder(data.cf1, c("cf.type", "cf.id"))
 
-data.cf2 <- data[pandemic == "yes"]
+data.cf2 <- copy(data.pan)
 data.cf2[, mort := 0]
 setorder(data.cf2, year)
 data.cf2[,
@@ -51,7 +57,7 @@ data.cf2[,
               cf.type = factor("cf2", levels = cf.types))]
 setcolorder(data.cf2, c("cf.type", "cf.id"))
 
-data.cf3 <- data[pandemic == "yes"]
+data.cf3 <- copy(data.pan)
 data.cf3[, pandemic := factor("no", levels = levels(pandemic), ordered = TRUE)]
 setorder(data.cf3, year)
 data.cf3[,
@@ -59,10 +65,8 @@ data.cf3[,
               cf.type = factor("cf3", levels = cf.types))]
 setcolorder(data.cf3, c("cf.type", "cf.id"))
 
-data.cf4 <- data[pandemic == "yes"]
-data.cf4[, 
-         `:=`(mort = 0,
-              pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
+data.cf4 <- copy(data.pan)
+data.cf4[, year := year.sam]
 setorder(data.cf4, year)
 data.cf4[,
          `:=`(cf.id = 1:.N,
@@ -75,5 +79,7 @@ saveRDS(data.cf2, file.data.cf2)
 saveRDS(data.cf3, file.data.cf3)
 saveRDS(data.cf4, file.data.cf4)
 
-
-
+data.cf1
+data.cf2
+data.cf3
+data.cf4
