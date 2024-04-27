@@ -30,7 +30,7 @@ if(!dir.exists(path.gam))
 file.data.proc <- paste0(path.data.proc, model.reg, ".data.proc.rds")
 model.name <- paste0(model.reg, ".m", model.id)
 
-k.reg <- list(amz = c(t.bl = 5,
+k.reg <- list(amz = c(t.bl = 6,
                       loc.bl = 500,
                       loc.foro = 100,
                       loc.itpa = 150,
