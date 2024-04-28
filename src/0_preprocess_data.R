@@ -86,29 +86,44 @@ for(i in 1:length(regions)) {
                       name1 = "Lima Province")]
   covid <- rbind(covid, covid.per.15_1)
 
+  covid[, `:=`(mortlag1_2020 = 0,
+               mortlag1_2021 = mort_2020,
+               mortlag1_2022 = mort_2021)]
 
   data.int.nosub <-
+  merge(
     melt(covid[adm0 %in% adm.nosub,
                .(adm0, mort_2020,mort_2021, mort_2022)],
          id.vars = "adm0",
-         measure.vars = measure(value.name, year = as.integer, sep = "_")) |>
-    merge(data.int[adm0 %in% adm.nosub],
-          by = c("adm0", "year"),
-          all.y = TRUE)
+         measure.vars = measure(value.name, year = as.integer, sep = "_")),
+    melt(covid[adm0 %in% adm.nosub,
+               .(adm0, mortlag1_2020,mortlag1_2021, mortlag1_2022)],
+         id.vars = "adm0",
+         measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
+  merge(data.int[adm0 %in% adm.nosub],
+        by = c("adm0", "year"),
+        all.y = TRUE)
+
 
   data.int.sub <-
+  merge(
     melt(covid[adm0 %notin% adm.nosub,
                .(adm0, adm1, mort_2020,mort_2021, mort_2022)],
          id.vars = c("adm0", "adm1"),
-         measure.vars = measure(value.name, year = as.integer, sep = "_")) |>
-    merge(data.int[adm0 %notin% adm.nosub],
+         measure.vars = measure(value.name, year = as.integer, sep = "_")),
+    melt(covid[adm0 %notin% adm.nosub,
+               .(adm0, adm1, mortlag1_2020,mortlag1_2021, mortlag1_2022)],
+         id.vars = c("adm0", "adm1"),
+         measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
+  merge(data.int[adm0 %notin% adm.nosub],
           by = c("adm0", "adm1", "year"),
-          all.y = TRUE)
+        all.y = TRUE)
+
 
   data.int.covid <- rbind(data.int.nosub, data.int.sub)
   data.int.covid[is.na(mort), mort := 0]
+  data.int.covid[is.na(mortlag1), mortlag1 := 0]
 
-  
   # Include political administrations
 
   cabinets <- fread(file.cabinets)
@@ -145,10 +160,10 @@ for(i in 1:length(regions)) {
                 "it", "it_type", "pa", "pa_type", "overlap",
                 "tri", "dist_set", "dist_roads", "dist_rivers",
                 "dens_roads", "dens_pop",
-                "mort", "cabinet",
+                "mort", "mortlag1",
+                "cabinet",
                 "lon", "lat",
                 "ed_east", "ed_north", "ea_east", "ea_north"))
-
 
   saveRDS(data.int.all, file.data.int)
 

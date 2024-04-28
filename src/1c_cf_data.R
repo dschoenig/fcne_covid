@@ -25,7 +25,7 @@ data <-
       pa_type,
       overlap,
       pandemic,
-      mort,
+      mort, mortlag1,
       ed_east, ed_north,
       som_x, som_y)]
 
