@@ -18,7 +18,7 @@ task_id <- as.integer(args[3])
 task_count <- as.integer(args[4])
 
 # region <- "amz"
-# pred_type <- "fac"
+# pred_type <- "cf1"
 # task_id <- 1
 # task_count <- 1000
 
@@ -27,7 +27,7 @@ file.post <- paste0(path.gam, region,  ".m1.post.rds")
 
 col.sel <-
   c("year", "for_type", "it_type", "pa_type", "overlap",
-    "pandemic", "mort", "ed_east", "ed_north",
+    "pandemic", "mort", "mortlag1", "ed_east", "ed_north",
     "som_x", "som_y")
 
 if(pred_type == "fac") {
