@@ -40,8 +40,10 @@ year.sam <- sample(2017:2019, nrow(data.pan), replace = T)
 data.cf1 <- 
   copy(data.pan) |>
   _[, 
-    `:=`(year = year.sam,
+    `:=`(year.fac = year,
+         year = year.sam,
          mort = 0,
+         mortlag1 = 0,
          pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
 setorder(data.cf1, year)
 data.cf1[,
@@ -49,8 +51,11 @@ data.cf1[,
               cf.type = factor("cf1", levels = cf.types))]
 setcolorder(data.cf1, c("cf.type", "cf.id"))
 
-data.cf2 <- copy(data.pan)
-data.cf2[, mort := 0]
+data.cf2 <-
+  copy(data.pan) |>
+  _[, 
+    `:=`(mort = 0,
+         mortlag1 = 0)]
 setorder(data.cf2, year)
 data.cf2[,
          `:=`(cf.id = 1:.N,
@@ -65,8 +70,11 @@ data.cf3[,
               cf.type = factor("cf3", levels = cf.types))]
 setcolorder(data.cf3, c("cf.type", "cf.id"))
 
-data.cf4 <- copy(data.pan)
-data.cf4[, year := year.sam]
+data.cf4 <-
+  copy(data.pan) |>
+  _[, 
+    `:=`(year.fac = year,
+         year = year.sam)]
 setorder(data.cf4, year)
 data.cf4[,
          `:=`(cf.id = 1:.N,
