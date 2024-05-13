@@ -116,6 +116,9 @@ if(model.id == 1) {
         s(mort,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
+        s(mortlag1,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)) + 
@@ -157,6 +160,9 @@ if(model.id == 2) {
            xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
+        s(mortlag1,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
@@ -234,6 +240,9 @@ if(model.id == 4) {
         s(mort,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
+        s(mortlag1,
+          k = k.def$mort,
+          xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)),
@@ -271,44 +280,6 @@ if(model.id == 5) {
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)),
-        family = binomial(link = "cloglog"),
-        data = data.mod,
-        select = TRUE,
-        discrete = max.discrete.bins,
-        nthreads = n.threads,
-        control = gam.control(trace = TRUE, epsilon = conv.eps)
-        )
-}
-
-if(model.id == 6) {
-  model <-
-    bam(forestloss ~
-        te(ed_east, ed_north, year,
-           d = c(2,1), k = c(k.def$loc.bl, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.bl),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = for_type,
-           d = c(2,1), k = c(k.def$loc.foro, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.foro),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = it_type,
-           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = pa_type,
-           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        s(mort,
-          k = k.def$mort,
-          xt = list(max.knots = max.knots.def$mort)) +
-        s(mortlag1,
-          k = k.def$mort,
-          xt = list(max.knots = max.knots.def$mort)) +
-        te(som_x, som_y, year,
-           d = c(2,1), k = c(k.def$som.np, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$som.np),
-                     list(max.knots = max.knots.def$t.bl))),
         family = binomial(link = "cloglog"),
         data = data.mod,
         select = TRUE,
