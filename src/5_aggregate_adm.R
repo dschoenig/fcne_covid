@@ -17,7 +17,7 @@ draws.eval.chunk <- 10
 
 # n.threads <- 1
 # region <- "amz"
-# pred_type <- "fac"
+# pred_type <- "cf4"
 # draws.max <- 8
 # draws.load.chunk <- 4
 # draws.eval.chunk <- 2
@@ -48,22 +48,27 @@ file.agg <- paste0(path.agg, region, ".adm.", pred_type, ".rds")
 if(pred_type == "fac") {
   id.var <- "id"
   merge.cols <- c(id.var, "adm0", "year")
-  group.sel <- c("group.id", "type", "adm0", "year")
   data <-
     readRDS(file.data) |>
     _[year >= 2020, ..merge.cols]
+  group.sel <- c("group.id", "type", "adm0", "year")
   group.by <- list("type",
                    "adm0",
                    "year",
                    c("year", "adm0"))
 } else {
   id.var <- "cf.id"
-  merge.cols <- c(id.var, "adm0")
-  group.sel <- c("group.id", "type", "adm0")
-  data <-
-    readRDS(file.data) |>
-    _[, ..merge.cols]
-  group.by <- list("type", "adm0")
+  merge.cols <- c(id.var, "adm0", "year")
+  data <- readRDS(file.data)
+  if(pred_type %in% c("cf1", "cf4")) {
+  data[, year := year.fac]
+  }
+  data <- data[, ..merge.cols]
+  group.sel <- c("group.id", "type", "adm0", "year")
+  group.by <- list("type",
+                   "adm0",
+                   "year",
+                   c("year", "adm0"))
 }
 data[, type := factor(pred_type)]
 
@@ -156,6 +161,8 @@ eval.agg <- rbindlist(eval.agg.i)
 setcolorder(eval.agg, group.sel)
 setorder(eval.agg, .draw, group.id)
 # eval.agg.fac[is.na(adm0), adm0 := "AMZ"]
+
+print(eval.agg)
 
 paste0("Saving aggregated predictions as ", file.agg, " …") |>
 message()
