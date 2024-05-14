@@ -27,6 +27,7 @@ data <-
       pandemic,
       mort, mortlag1,
       ed_east, ed_north,
+      ea_east, ea_north,
       som_x, som_y)]
 
 cf.types <- paste0("cf", 1:4)

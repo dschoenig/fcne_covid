@@ -17,7 +17,7 @@ draws.eval.chunk <- 10
 
 # n.threads <- 1
 # region <- "amz"
-# pred_type <- "fac"
+# pred_type <- "cf1"
 # draws.max <- 8
 # draws.load.chunk <- 4
 # draws.eval.chunk <- 2
@@ -42,8 +42,9 @@ if(pred_type == "fac") {
   path.arrow <- paste0(path.pred, region, "/", pred_type, "/")
 }
 
-file.agg <- paste0(path.agg, region, ".adm.", pred_type, ".rds")
+file.agg <- paste0(path.agg, region, ".geo.", pred_type, ".rds")
 
+map.res <- 2.5e4
 
 if(pred_type == "fac") {
   id.var <- "id"
@@ -57,16 +58,23 @@ if(pred_type == "fac") {
     data[, year := year.fac]
   }
 }
-merge.cols <- c(id.var, "adm0", "year")
+
+
+map.anchor <- c(ea_east = floor(min(data$ea_east / map.res)) * map.res,
+                ea_north = floor(min(data$ea_north / map.res)) * map.res)
+data <-
+  bin_cols(data,
+           columns = c("ea_east", "ea_north"), bin.res = rep(map.res, 2),
+           bin.min = map.anchor, append = TRUE)
+merge.cols <- c(id.var, "year", "ea_east.bin", "ea_north.bin")
 data <- data[, ..merge.cols]
 data[, type := factor(pred_type)]
 
 
-group.sel <- c("group.id", "type", "adm0", "year")
-group.by <- list("type",
-                 "adm0",
-                 "year",
-                 c("year", "adm0"))
+group.sel <- c("group.id", "type", "year", "ea_east.bin", "ea_north.bin")
+group.by <- list(c("ea_east.bin", "ea_north.bin"),
+                 c("year", "ea_east.bin", "ea_north.bin"))
+
 
 groups.l <- list()
 for(i in seq_along(group.by)){
@@ -77,10 +85,12 @@ for(i in seq_along(group.by)){
                   add.label = FALSE)
 }
 groups <- rbindlist(groups.l, fill = TRUE)
+
+
 groups[, group.id := 1:nrow(groups)]
 setorder(groups, group.id)
 setcolorder(groups, c("group.id", unique(unlist(group.by))))
-groups[, type := rep(na.omit(unique(type)), .N)]
+groups[, type := rep(as.factor(pred_type), .N)]
 
 
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -156,7 +166,6 @@ for(i in seq_along(draw.chunks.load$from)) {
 eval.agg <- rbindlist(eval.agg.i)
 setcolorder(eval.agg, group.sel)
 setorder(eval.agg, .draw, group.id)
-# eval.agg.fac[is.na(adm0), adm0 := "AMZ"]
 
 print(eval.agg)
 
