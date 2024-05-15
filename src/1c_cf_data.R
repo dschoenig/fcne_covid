@@ -28,7 +28,7 @@ data <-
       mort, mortlag1,
       ed_east, ed_north,
       ea_east, ea_north,
-      som_x, som_y)]
+      som_x, som_y, som_bmu)]
 
 cf.types <- paste0("cf", 1:4)
 
