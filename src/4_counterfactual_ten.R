@@ -46,7 +46,7 @@ if(pred_type == "fac") {
   }
 }
 
-var.sel <- c(id.var, "year",
+var.sel <- c(id.var, "year", "for_type",
              "it_type", "pa_type",
              "som_bmu", "ed_east", "ed_north")
 
@@ -57,9 +57,11 @@ data.cf[, year := factor(as.character(year))]
 
 som.fit <- readRDS(file.som)
 
+# data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
+
 cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
 fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
-comp.by <- "year"
+comp.by <- c("for_type", "year")
 group.by <- list("it_type",
                  c("year", "it_type"),
                  "pa_type",
@@ -86,15 +88,6 @@ paste0("Counterfactual will be saved as ", file.out) |>
 message()
 
 message("Defining counterfactual …")
-
-# data.cf2 <- data.cf[sample(1:nrow(data.cf), 1e5)]
-# cf.ids <- data.cf2[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
-# fac.ids <- data.cf2[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
-# comp.by <- "year"
-# group.by <- list("it_type",
-#                  c("year", "it_type"),
-#                  "pa_type",
-#                  c("year", "pa_type"))
 
 source("utilities.R")
 a <- Sys.time()
