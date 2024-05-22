@@ -20,7 +20,7 @@ if(length(args) < 3) {
 }
 
 # model.reg <- "amz"
-# model.id <- 6
+# model.id <- 1
 # n.threads <- c(2,1)
 
 
@@ -71,11 +71,13 @@ data.mod <-
       ed_east, ed_north,
       som_x, som_y)]
 # rm(data.proc)
+data.mod[, mort.id := as.numeric(year >= 2020)]
+data.mod[, mortlag1.id := as.numeric(year >= 2021)]
 
 k.def <- k.reg[[model.reg]]
 max.knots.def <- max.knots.reg[[model.reg]]
 
-# # # FOR TESTING ONLY:
+# # FOR TESTING ONLY:
 # k.def = k.def / 10
 # max.knots.def = max.knots.def / 10
 # set.seed(1234)
@@ -114,9 +116,11 @@ if(model.id == 1) {
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
+          by = mort.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(mortlag1,
+          by = mortlag1.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
@@ -160,9 +164,11 @@ if(model.id == 2) {
            xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
+          by = mort.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(mortlag1,
+          by = mortlag1.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
@@ -238,9 +244,11 @@ if(model.id == 4) {
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
+          by = mort.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(mortlag1,
+          by = mortlag1.id,
           k = k.def$mort,
           xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
