@@ -25,7 +25,7 @@ data <-
       pa_type,
       overlap,
       pandemic,
-      mort, mortlag1,
+      mort, mort.id, mortlag1, mortlag1.id,
       ed_east, ed_north,
       ea_east, ea_north,
       som_x, som_y, som_bmu)]
@@ -44,7 +44,9 @@ data.cf1 <-
     `:=`(year.fac = year,
          year = year.sam,
          mort = 0,
+         mort.id = as.numeric(0),
          mortlag1 = 0,
+         mortlag1.id = as.numeric(0),
          pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
 setorder(data.cf1, year)
 data.cf1[,
@@ -56,7 +58,9 @@ data.cf2 <-
   copy(data.pan) |>
   _[, 
     `:=`(mort = 0,
-         mortlag1 = 0)]
+         mort.id = as.numeric(0),
+         mortlag1 = 0,
+         mortlag1.id = as.numeric(0))]
 setorder(data.cf2, year)
 data.cf2[,
          `:=`(cf.id = 1:.N,

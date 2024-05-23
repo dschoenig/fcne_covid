@@ -148,7 +148,9 @@ for(i in 1:length(regions)) {
                     cabinet = factor(cabinet),
                     pandemic = factor(fifelse(year < 2020, "no", "yes"),
                                       levels = c("no", "yes"),
-                                      ordered = TRUE))]
+                                      ordered = TRUE),
+                    mort.id = as.numeric(year >= 2020),
+                    mortlag1.id = as.numeric(year >= 2021))]
   
   setkey(data.int.all, id)
   setcolorder(data.int.all,
@@ -160,7 +162,7 @@ for(i in 1:length(regions)) {
                 "it", "it_type", "pa", "pa_type", "overlap",
                 "tri", "dist_set", "dist_roads", "dist_rivers",
                 "dens_roads", "dens_pop",
-                "mort", "mortlag1",
+                "mort", "mort.id", "mortlag1", "mortlag1.id",
                 "cabinet",
                 "lon", "lat",
                 "ed_east", "ed_north", "ea_east", "ea_north"))

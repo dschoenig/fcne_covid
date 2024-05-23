@@ -67,12 +67,10 @@ data.mod <-
       pa_type,
       overlap,
       pandemic,
-      mort, mortlag1,
+      mort, mort.id, mortlag1, mortlag1.id,
       ed_east, ed_north,
       som_x, som_y)]
 # rm(data.proc)
-data.mod[, mort.id := as.numeric(year >= 2020)]
-data.mod[, mortlag1.id := as.numeric(year >= 2021)]
 
 k.def <- k.reg[[model.reg]]
 max.knots.def <- max.knots.reg[[model.reg]]

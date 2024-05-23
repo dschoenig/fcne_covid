@@ -27,7 +27,8 @@ file.post <- paste0(path.gam, region,  ".m1.post.rds")
 
 col.sel <-
   c("year", "for_type", "it_type", "pa_type", "overlap",
-    "pandemic", "mort", "mortlag1", "ed_east", "ed_north",
+    "pandemic", "mort", "mort.id", "mortlag1", "mortlag1.id",
+    "ed_east", "ed_north",
     "som_x", "som_y")
 
 if(pred_type == "fac") {
@@ -66,9 +67,6 @@ row.chunks <- chunk_seq(1, nrow(data), ceiling(nrow(data) / task_count))
 data.pred <- data[row.chunks$from[task_id]:row.chunks$to[task_id],]
 rm(data)
 silence <- gc()
-data.pred[, mort.id := as.numeric(year >= 2020)]
-data.pred[, mortlag1.id := as.numeric(year >= 2021)]
-
 
 message(paste0("Generating predictions for model `", region, ".m1`, counterfactual `", pred_type,
         "`, using draws from the posterior distribution.\n"))
