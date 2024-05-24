@@ -43,9 +43,7 @@ data.cf1 <-
   _[, 
     `:=`(year.fac = year,
          year = year.sam,
-         mort = 0,
          mort.id = as.numeric(0),
-         mortlag1 = 0,
          mortlag1.id = as.numeric(0),
          pandemic = factor("no", levels = levels(pandemic), ordered = TRUE))]
 setorder(data.cf1, year)
@@ -57,9 +55,7 @@ setcolorder(data.cf1, c("cf.type", "cf.id"))
 data.cf2 <-
   copy(data.pan) |>
   _[, 
-    `:=`(mort = 0,
-         mort.id = as.numeric(0),
-         mortlag1 = 0,
+    `:=`(mort.id = as.numeric(0),
          mortlag1.id = as.numeric(0))]
 setorder(data.cf2, year)
 data.cf2[,
