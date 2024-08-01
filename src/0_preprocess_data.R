@@ -8,9 +8,13 @@ path.raw <- paste0(path.data, "raw/")
 path.fl <- paste0(path.raw, "forestloss/")
 path.cv <- paste0(path.raw, "covid/")
 path.int <- paste0(path.data, "intermediate/")
+path.proc <- paste0(path.data, "processed/")
 
 if(!dir.exists(path.int)){
   dir.create(path.int, recursive = TRUE)
+}
+if(!dir.exists(path.proc)){
+  dir.create(path.proc, recursive = TRUE)
 }
 
 regions <- c("amz")
@@ -19,11 +23,23 @@ regions <- c("amz")
 for(i in 1:length(regions)) {
 
   file.data.raw <- paste0(path.fl, regions[i], ".1722.vars.csv")
+  file.stats <- paste0(path.fl, regions[i], ".sumstats_1722.csv")
   file.covid.adm1 <- paste0(path.cv, regions[i], ".covid_mort.adm1.gpkg")
   file.cabinets <- paste0(path.raw, regions[i], ".cabinets.csv")
+
   file.data.int <- paste0(path.int, regions[i], ".data.int.rds")
+  file.stats.proc <- paste0(path.proc, regions[i], ".sumstats.proc.rds")
+
 
   vars <- fread(file.data.raw, na.strings = "", key = "id")
+
+  y.seq <- 2017:2022
+  it_cols <- paste0("it_", y.seq)
+  it_type_cols <- paste0("it_type_", y.seq)
+  pa_cols <- paste0("pa_", y.seq)
+  pa_type_cols <- paste0("pa_type_", y.seq)
+  itpa_cols <- c(it_cols, pa_cols)
+  itpa_type_cols <- c(it_type_cols, pa_type_cols)
 
   vars[, 
        `:=`(forestloss = ifelse(forestloss == "t", TRUE, FALSE),
@@ -32,20 +48,63 @@ for(i in 1:length(regions)) {
                                      "primary", "other"),
                               levels = c("primary", "other"),
                               ordered = TRUE),
-            it = ifelse(it == "t", TRUE, FALSE),
-            it_type = factor(it_type,
-                             levels = c("none", "recognized", "not_recognized"),
-                             ordered = TRUE),
-            pa = ifelse(pa == "t", TRUE, FALSE),
-            pa_type = factor(pa_type,
-                             levels = c("none", "indirect_use", "direct_use"),
-                             ordered = TRUE),
+            # it = ifelse(it == "t", TRUE, FALSE),
+            # it_type = factor(it_type,
+            #                  levels = c("none", "recognized", "not_recognized"),
+            #                  ordered = TRUE),
+            # pa = ifelse(pa == "t", TRUE, FALSE),
+            # pa_type = factor(pa_type,
+            #                  levels = c("none", "indirect_use", "direct_use"),
+            #                  ordered = TRUE),
             adm0 = factor(adm0),
             adm1 = factor(adm1)
             )
        ]
-  vars[is.na(it_type), it_type := "none"]
-  vars[is.na(pa_type), pa_type := "none"]
+  vars[,
+       (itpa_cols) := lapply(.SD, \(x) fifelse(x == "t", TRUE, FALSE)),
+       .SDcols = itpa_cols]
+  vars[,
+       (it_type_cols) := lapply(.SD,
+                                \(x) factor(x,
+                                            levels = c("none", "recognized", "not_recognized"),
+                                            ordered = TRUE)),
+       .SDcols = it_type_cols]
+  vars[,
+       (pa_type_cols) := lapply(.SD,
+                                \(x) factor(x,
+                                            levels = c("none", "indirect_use", "direct_use"),
+                                            ordered = TRUE)),
+       .SDcols = pa_type_cols]
+  vars[,
+       (itpa_type_cols) := lapply(.SD,
+                                  \(x) {
+                                    y <- x
+                                    y[is.na(x)] <- "none"
+                                    return(y)}
+                                  ),
+       .SDcols = itpa_type_cols]
+
+
+  # vars[pa_type_2017 != pa_type_2022, ..pa_type_cols]
+  # vars[is.na(it_type), it_type := "none"]
+  # vars[is.na(pa_type), pa_type := "none"]
+
+  for(i in seq_along(y.seq)) {
+    it.y <- paste0("it_", y.seq[i])
+    it_type.y <- paste0("it_type_", y.seq[i])
+    pa.y <- paste0("pa_", y.seq[i])
+    pa_type.y <- paste0("pa_type_", y.seq[i])
+    vars[year == y.seq[i],
+         `:=`(it = it.col,
+              it_type = it_type.col,
+              pa = pa.col,
+              pa_type = pa_type.col),
+         env = list(it.col = it.y,
+                    it_type.col = it_type.y,
+                    pa.col = pa_type.y,
+                    pa_type.col = pa_type.y)]
+  }
+
   vars[pa_type != "none" & it_type != "none",
        overlap := paste(it_type, pa_type, sep = ":")]
   vars[is.na(overlap), overlap := "none"]
@@ -91,33 +150,33 @@ for(i in 1:length(regions)) {
                mortlag1_2022 = mort_2021)]
 
   data.int.nosub <-
-  merge(
-    melt(covid[adm0 %in% adm.nosub,
-               .(adm0, mort_2020,mort_2021, mort_2022)],
-         id.vars = "adm0",
-         measure.vars = measure(value.name, year = as.integer, sep = "_")),
-    melt(covid[adm0 %in% adm.nosub,
-               .(adm0, mortlag1_2020,mortlag1_2021, mortlag1_2022)],
-         id.vars = "adm0",
-         measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
-  merge(data.int[adm0 %in% adm.nosub],
-        by = c("adm0", "year"),
-        all.y = TRUE)
+    merge(
+      melt(covid[adm0 %in% adm.nosub,
+                 .(adm0, mort_2020, mort_2021, mort_2022)],
+           id.vars = "adm0",
+           measure.vars = measure(value.name, year = as.integer, sep = "_")),
+      melt(covid[adm0 %in% adm.nosub,
+                 .(adm0, mortlag1_2020, mortlag1_2021, mortlag1_2022)],
+           id.vars = "adm0",
+           measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
+    merge(data.int[adm0 %in% adm.nosub],
+          by = c("adm0", "year"),
+          all.y = TRUE)
 
 
   data.int.sub <-
-  merge(
-    melt(covid[adm0 %notin% adm.nosub,
-               .(adm0, adm1, mort_2020,mort_2021, mort_2022)],
-         id.vars = c("adm0", "adm1"),
-         measure.vars = measure(value.name, year = as.integer, sep = "_")),
-    melt(covid[adm0 %notin% adm.nosub,
-               .(adm0, adm1, mortlag1_2020,mortlag1_2021, mortlag1_2022)],
-         id.vars = c("adm0", "adm1"),
-         measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
-  merge(data.int[adm0 %notin% adm.nosub],
-          by = c("adm0", "adm1", "year"),
-        all.y = TRUE)
+    merge(
+      melt(covid[adm0 %notin% adm.nosub,
+                 .(adm0, adm1, mort_2020, mort_2021, mort_2022)],
+           id.vars = c("adm0", "adm1"),
+           measure.vars = measure(value.name, year = as.integer, sep = "_")),
+      melt(covid[adm0 %notin% adm.nosub,
+                 .(adm0, adm1, mortlag1_2020, mortlag1_2021, mortlag1_2022)],
+           id.vars = c("adm0", "adm1"),
+           measure.vars = measure(value.name, year = as.integer, sep = "_"))) |>
+    merge(data.int[adm0 %notin% adm.nosub],
+            by = c("adm0", "adm1", "year"),
+          all.y = TRUE)
 
 
   data.int.covid <- rbind(data.int.nosub, data.int.sub)
@@ -160,7 +219,16 @@ for(i in 1:length(regions)) {
                 "forestloss", "lossyear",
                 "primary_forest", "for_type",
                 "it", "it_type", "pa", "pa_type", "overlap",
-                "tri", "dist_set", "dist_roads", "dist_rivers",
+                "it_2017", "it_2018", "it_2019",
+                "it_2020", "it_2021", "it_2022",
+                "it_type_2017", "it_type_2018", "it_type_2019",
+                "it_type_2020", "it_type_2021", "it_type_2022",
+                "pa_2017", "pa_2018", "pa_2019",
+                "pa_2020", "pa_2021", "pa_2022",
+                "pa_type_2017", "pa_type_2018", "pa_type_2019",
+                "pa_type_2020", "pa_type_2021", "pa_type_2022",
+                "elevation", "slope", "tri", "sx",
+                "dist_set", "dist_roads", "dist_rivers",
                 "dens_roads", "dens_pop",
                 "mort", "mort.id", "mortlag1", "mortlag1.id",
                 "cabinet",
@@ -170,5 +238,57 @@ for(i in 1:length(regions)) {
   saveRDS(data.int.all, file.data.int)
 
   rm(data.int, vars)
+
+
+  stats <- fread(file.stats, na.strings = "", key = "id")
+
+  y.seq <- c(2017, 2022)
+  it_cols <- paste0("it_", y.seq)
+  it_type_cols <- paste0("it_type_", y.seq)
+  pa_cols <- paste0("pa_", y.seq)
+  pa_type_cols <- paste0("pa_type_", y.seq)
+  itpa_cols <- c(it_cols, pa_cols)
+  itpa_type_cols <- c(it_type_cols, pa_type_cols)
+
+  stats[, 
+       `:=`(primary_forest = ifelse(primary_forest == "t", TRUE, FALSE),
+            for_type = factor(ifelse(primary_forest == "t",
+                                     "primary", "other"),
+                              levels = c("primary", "other"),
+                              ordered = TRUE),
+            adm0 = factor(adm0))
+       ]
+  stats[,
+       (itpa_cols) := lapply(.SD, \(x) fifelse(x == "t", TRUE, FALSE)),
+       .SDcols = itpa_cols]
+  stats[,
+       (it_type_cols) := lapply(.SD,
+                                \(x) factor(x,
+                                            levels = c("none", "recognized", "not_recognized"),
+                                            ordered = TRUE)),
+       .SDcols = it_type_cols]
+  stats[,
+       (pa_type_cols) := lapply(.SD,
+                                \(x) factor(x,
+                                            levels = c("none", "indirect_use", "direct_use"),
+                                            ordered = TRUE)),
+       .SDcols = pa_type_cols]
+  stats[,
+       (itpa_type_cols) := lapply(.SD,
+                                  \(x) {
+                                    y <- x
+                                    y[is.na(x)] <- "none"
+                                    return(y)}
+                                  ),
+       .SDcols = itpa_type_cols]
+
+  setcolorder(stats,
+              c("id", "adm0",
+                "dm", "lossyear", "cover",
+                "primary_forest", "for_type",
+                it_cols, it_type_cols, pa_cols, pa_type_cols,
+                "ea_east", "ea_north"))
+
+  saveRDS(stats, file.stats.proc)
 
 }

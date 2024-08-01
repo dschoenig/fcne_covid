@@ -17,10 +17,9 @@ n.cores <- as.integer(args[2])
 # n.cores <- 4
 
 # SOM parameters
-x.dim <- 100
-y.dim <- 100
+x.dim <- 50
+y.dim <- 50
 epochs <- 1000
-radius <- 100
 
 seed <- 19120623
 
@@ -31,12 +30,14 @@ message(paste0("Fitting SOM (", region, ", ", n.cores, " cores) …"))
 file.data.int <- paste0(path.data, region, ".data.int.rds")
 file.prefix.som <- paste0(path.som, region, ".som.")
 
+cov <-
+  c("elevation", "slope", "sx", "cover",
+    "dist_set", "dist_roads", "dist_rivers",
+    "dens_pop", "dens_roads")
+
 data <-
   readRDS(file.data.int) |>
-  _[,
-    .(tri, dist_set, dist_roads,
-      dist_rivers, dens_pop, dens_roads)]
-
+  _[, ..cov]
 
 set.seed(seed)
 sam <- sample(1:nrow(data), 1e6)
@@ -63,8 +64,7 @@ som.1e4 <-
           x.dim = x.dim,
           y.dim = y.dim,
           epochs = epochs,
-          vars = c("tri", "dist_set", "dist_roads",
-                   "dist_rivers", "dens_pop", "dens_roads"),
+          vars = cov,
           parallel = n.cores)
 
 b <- Sys.time()
@@ -82,8 +82,7 @@ som.1e5 <-
           x.dim = x.dim,
           y.dim = y.dim,
           epochs = epochs,
-          vars = c("tri", "dist_set", "dist_roads",
-                   "dist_rivers", "dens_pop", "dens_roads"),
+          vars = cov,
           parallel = n.cores)
 
 b <- Sys.time()
@@ -101,8 +100,7 @@ som.1e6 <-
           x.dim = x.dim,
           y.dim = y.dim,
           epochs = epochs,
-          vars = c("tri", "dist_set", "dist_roads",
-                   "dist_rivers", "dens_pop", "dens_roads"),
+          vars = cov,
           parallel = n.cores)
 
 b <- Sys.time()
