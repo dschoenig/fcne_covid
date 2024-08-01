@@ -65,7 +65,9 @@ comp.by <- c("for_type", "year")
 group.by <- list("it_type",
                  c("year", "it_type"),
                  "pa_type",
-                 c("year", "pa_type"))
+                 c("year", "pa_type"),
+                 c("it_type", "pa_type"),
+                 c("year", "it_type", "pa_type"))
 
 
 
