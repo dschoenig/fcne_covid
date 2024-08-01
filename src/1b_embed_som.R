@@ -33,13 +33,15 @@ a <- Sys.time()
 
 data.int <- readRDS(file.data.int)
 
+cov <-
+  c("elevation", "slope", "sx", "cover",
+    "dist_set", "dist_roads", "dist_rivers",
+    "dens_pop", "dens_roads")
+
 embedded <-
-  egp_embed(data.int[,
-                     .(tri, dist_set, dist_roads,
-                       dist_rivers, dens_pop, dens_roads)],
+  egp_embed(data.int[, ..cov],
             som.fit,
-            vars = c("tri", "dist_set", "dist_roads",
-                     "dist_rivers", "dens_pop", "dens_roads"),
+            vars = cov,
             scale = TRUE,
             bmu.name = "som_bmu",
             coord = TRUE,
