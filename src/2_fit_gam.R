@@ -40,10 +40,10 @@ k.reg <- list(amz = c(t.bl = 6,
                       som.p = 500))
 # Increase number of maximum knots 5-fold (default: 2000)
 max.knots.reg <- list(amz = c(t.bl = NULL,
-                              loc.bl = 1e4,
-                              loc.foro = 1e4,
-                              loc.itpa = 1e4,
-                              loc.ov = 1e4,
+                              loc.bl = 2e4,
+                              loc.foro = 2e4,
+                              loc.itpa = 2e4,
+                              loc.ov = 2e4,
                               mort = NULL,
                               som.np = 2.5e3,
                               som.p = 2.5e3))
@@ -297,69 +297,28 @@ if(model.id == 5) {
 
 
 if(model.id == 6) {
-# Like 1, but covariate effects change continuously over the years
+# Like 1, but with gp smooths
   model <-
     bam(forestloss ~
         te(ed_east, ed_north, year,
+           bs = c("gp", "tp"),
            d = c(2,1), k = c(k.def$loc.bl, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.bl),
                      list(max.knots = max.knots.def$t.bl))) +
         te(ed_east, ed_north, year, by = for_type,
            d = c(2,1), k = c(k.def$loc.foro, k.def$t.bl),
+           bs = c("gp", "tp"),
            xt = list(list(max.knots = max.knots.def$loc.foro),
                      list(max.knots = max.knots.def$t.bl))) +
         te(ed_east, ed_north, year, by = it_type,
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+           bs = c("gp", "tp"),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
         te(ed_east, ed_north, year, by = pa_type,
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+           bs = c("gp", "tp"),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        s(mort,
-          by = mort.id,
-          k = k.def$mort,
-          xt = list(max.knots = max.knots.def$mort)) +
-        s(mortlag1,
-          by = mortlag1.id,
-          k = k.def$mort,
-          xt = list(max.knots = max.knots.def$mort)) +
-        te(som_x, som_y, year,
-           d = c(2,1), k = c(k.def$som.np, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$som.np),
-                     list(max.knots = max.knots.def$t.bl))),
-        family = binomial(link = "cloglog"),
-        data = data.mod,
-        select = TRUE,
-        discrete = max.discrete.bins,
-        nthreads = n.threads,
-        control = gam.control(trace = TRUE, epsilon = conv.eps)
-        )
-}
-
-if(model.id == 7) {
-# Like 1, but with overlap term
-  model <-
-    bam(forestloss ~
-        te(ed_east, ed_north, year,
-           d = c(2,1), k = c(k.def$loc.bl, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.bl),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = for_type,
-           d = c(2,1), k = c(k.def$loc.foro, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.foro),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = it_type,
-           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = pa_type,
-           d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = overlap,
-           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
           by = mort.id,
@@ -371,9 +330,11 @@ if(model.id == 7) {
           xt = list(max.knots = max.knots.def$mort)) +
         s(som_x, som_y,
           k = k.def$som.np,
+          bs = "gp",
           xt = list(max.knots.def$som.np)) + 
         s(som_x, som_y, by = pandemic,
           k = k.def$som.p,
+          bs = "gp",
           xt = list(max.knots.def$som.p)),
         family = binomial(link = "cloglog"),
         data = data.mod,
@@ -383,8 +344,6 @@ if(model.id == 7) {
         control = gam.control(trace = TRUE, epsilon = conv.eps)
         )
 }
-b <- Sys.time()
-b - a
 
 model
 summary(model, re.test = FALSE)
