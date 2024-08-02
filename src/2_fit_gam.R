@@ -45,8 +45,8 @@ max.knots.reg <- list(amz = c(t.bl = NULL,
                               loc.itpa = 1e4,
                               loc.ov = 1e4,
                               mort = NULL,
-                              som.np = 1e4,
-                              som.p = 1e4))
+                              som.np = 2.5e3,
+                              som.p = 2.5e3))
 # max.knots.reg <- list(cam = c(k.reg$cam[1:3] * 10, som = 10000),
 #                       amz = c(k.reg$amz[1:3] * 10, som = 10000))
 
