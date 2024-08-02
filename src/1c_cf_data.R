@@ -64,6 +64,7 @@ for(i in seq_along(y.seq)) {
                       pa_type.col = pa_type.y)]
 }
 
+data.cf1[, overlap := NA]
 data.cf1[pa_type != "none" & it_type != "none",
          overlap := paste(it_type, pa_type, sep = ":")]
 data.cf1[is.na(overlap), overlap := "none"]
@@ -120,6 +121,7 @@ for(i in seq_along(y.seq)) {
                       pa_type.col = pa_type.y)]
 }
 
+data.cf1[, overlap := NA]
 data.cf1[pa_type != "none" & it_type != "none",
          overlap := paste(it_type, pa_type, sep = ":")]
 data.cf1[is.na(overlap), overlap := "none"]
