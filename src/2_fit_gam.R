@@ -113,6 +113,10 @@ if(model.id == 1) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = overlap,
+           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.ov),
+                     list(max.knots = max.knots.def$t.bl))) +
         s(mort,
           by = mort.id,
           k = k.def$mort,
@@ -156,10 +160,6 @@ if(model.id == 2) {
         te(ed_east, ed_north, year, by = pa_type,
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
-                     list(max.knots = max.knots.def$t.bl))) +
-        te(ed_east, ed_north, year, by = overlap,
-           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
-           xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
           by = mort.id,
@@ -205,6 +205,10 @@ if(model.id == 3) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = overlap,
+           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.ov),
+                     list(max.knots = max.knots.def$t.bl))) +
         s(som_x, som_y,
           k = k.def$som.np,
           xt = list(max.knots.def$som.np)) + 
@@ -241,6 +245,10 @@ if(model.id == 4) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
                      list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = overlap,
+           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.ov),
+                     list(max.knots = max.knots.def$t.bl))) +
         s(mort,
           by = mort.id,
           k = k.def$mort,
@@ -264,7 +272,6 @@ if(model.id == 4) {
 
 if(model.id == 5) {
 # Like 1, but neither mortality effect nor pandemic effect on covariates
-# Does not converge
   model <-
     bam(forestloss ~
         te(ed_east, ed_north, year,
@@ -282,6 +289,10 @@ if(model.id == 5) {
         te(ed_east, ed_north, year, by = pa_type,
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = overlap,
+           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
+           xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(som_x, som_y,
           k = k.def$som.np,
@@ -319,6 +330,11 @@ if(model.id == 6) {
            d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
            bs = c("gp", "tp"),
            xt = list(list(max.knots = max.knots.def$loc.itpa),
+                     list(max.knots = max.knots.def$t.bl))) +
+        te(ed_east, ed_north, year, by = overlap,
+           d = c(2,1), k = c(k.def$loc.ov, k.def$t.bl),
+           bs = c("gp", "tp"),
+           xt = list(list(max.knots = max.knots.def$loc.ov),
                      list(max.knots = max.knots.def$t.bl))) +
         s(mort,
           by = mort.id,
