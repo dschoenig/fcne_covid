@@ -24,7 +24,7 @@ if(!dir.exists(path.cf))
 
 file.data <- paste0(path.data.proc, region, ".data.proc.rds")
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.", pred_type, ".rds")
+file.out <- paste0(path.cf, region, ".covid.", pred_type, ".rds")
 
 
 id.var <- "id"
