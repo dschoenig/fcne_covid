@@ -535,7 +535,7 @@ get_nb <- function(x) {x$grid.nb}
            .(id.to,
              n,
              deg = 1:length(dist),
-             nc = cumsum(n),
+             nc = cumsum(as.numeric(n)),
              dist),
            by = id.from
            ]
@@ -959,7 +959,7 @@ egp_define_counterfactual <-
 
   if(is.null(agg.size)) agg.size <- sum(units.fac$.n)
 
-  units.fac[order(-.n), .nc := cumsum(.n)]
+  units.fac[order(-.n), .nc := cumsum(as.numeric(.n))]
   units.fac[, .agg.id := ceiling(.nc / agg.size)]
   units.fac <- units.fac[, -c(".n", ".nc")]
   agg.ids <- na.omit(unique(units.fac[order(.agg.id), .agg.id]))
@@ -1646,7 +1646,7 @@ egp_posterior_draw <- function(model,
              row.ids = list(mar.lu$.row[.I]),
              ids = list(mar.lu[[id.var]][.I])),
            by = c("marginal", "chunk")]
-  mar.lu[, `:=`(eval.id.from = 1 + cumsum(n) - n, eval.id.to = cumsum(n)), marginal]
+  mar.lu[, `:=`(eval.id.from = 1 + cumsum(as.numeric(n)) - n, eval.id.to = cumsum(as.numeric(n))), marginal]
   evaluated <- list()
   for(i in seq_along(marginals)) {
       # idx <- id.lu[eval(parse(text = paste(id.col, "%in% marginal.ids[[i]]")))]
@@ -1816,7 +1816,7 @@ egp_posterior_predict <- function(model,
     setnames(c(group.name, id.var, ".w"))
   setorderv(ids.dt, group.name)
   ids.dt[,N := as.numeric(unname(unlist(lapply(ids, length))))]
-  ids.dt[order(-N), Nc := cumsum(N)]
+  ids.dt[order(-N), Nc := cumsum(as.numeric(N))]
   ids.dt[,
          `:=`(aggregate = ifelse(N < agg.size, TRUE, FALSE))
          ][aggregate == TRUE, 
@@ -2180,7 +2180,7 @@ ks_stat <- function(x, y, na.rm = FALSE) {
   v <- c(x, y)
   w <- c(rep(1/n.x, length(x)), rep(-1/n.y, length(y)))
   ind <- order(v)
-  z <- abs(cumsum(w[ind]))
+  z <- abs(cumsum(as.numeric(w[ind])))
   z <- z[diff(v[ind]) != 0]
   ks <- ifelse(length(z) > 0, max(z), 0)
   return(ks)
@@ -2198,7 +2198,7 @@ ks_stat_w <- function(x, y, wx, wy, na.rm = FALSE) {
   v <- c(x, y)
   w <- c(wx, wy)
   ind <- order(v)
-  z <- abs(cumsum(w[ind]))
+  z <- abs(cumsum(as.numeric(w[ind])))
   z <- z[diff(v[ind]) != 0]
   ks <- ifelse(length(z) > 0, max(z), 0)
   return(ks)
