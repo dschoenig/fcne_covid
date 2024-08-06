@@ -17,7 +17,7 @@ region <- tolower(as.character(args[2]))
 
 n.threads <- 4
 region <- "amz"
-overwrite <- TRUE
+overwrite <- FALSE
 
 path.base <- "../"
 path.data <- paste0(path.base, "data/")
@@ -551,7 +551,7 @@ maps[[region]]$diff.ci <-
 # Difference CIs
 
 # IUFRO GEO
-png("../results/figures/fcne_covid_geo.png", width = 7, height = 3.5, unit = "in", res = 600)
+png("../results/figures/fcne_covid_geo.png", width = 7, height = 3, unit = "in", res = 600)
 maps[[region]]$diff +
   facet_grid(cols = vars(year.label), rows = vars(type.label), switch = "y")
 dev.off()

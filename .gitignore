@@ -1,6 +1,7 @@
 data/
 results/
 log/
+doc/
 models/
 tmp/
 src/scratch.R

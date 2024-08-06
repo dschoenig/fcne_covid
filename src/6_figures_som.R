@@ -33,7 +33,7 @@ if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
 
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-cf.name <- "cf3"
+cf.name <- "cf1"
 files.agg <- paste0(path.agg, region, ".som.", c("fac", cf.name), ".rds")
 
 file.fig.geo <- paste0(path.figures, region, ".som.png")
@@ -132,28 +132,53 @@ map_guide_fill <-
 
 cov.scales <-
   list(amz = 
-         list(tri = list(title = "Terrain ruggedness index",
-                         trans = scales::yj_trans(0),
-                         breaks = c(0, 3, 10, 30, 75),
-                         limits = c(0, 75),
-                         labels = scales::label_comma(big.mark =" ", accuracy = 0.1)),
+         list(
+              # tri = list(title = "Terrain ruggedness index",
+              #            trans = scales::yj_trans(0),
+              #            breaks = c(0, 3, 10, 30, 100),
+                         # limits = c(0, 100),
+                         # labels = scales::label_comma(big.mark =" ", accuracy = 0.1)),
+              elevation = list(
+                               title = "Elevation (m)",
+                               trans = scales::identity_trans(),
+                               breaks = seq(0, 5e3, 1e3),
+                               limits = c(0, 5e3),
+                               labels = scales::label_comma(big.mark =" ")),
+              slope = list(
+                           title = "Slope (degrees)",
+                           trans = scales::identity_trans(),
+                           breaks = seq(0, 75, 25),
+                           limits = c(0, 75),
+                           labels = scales::label_comma(big.mark =" ")),
+              cover = list(
+                           title = "Tree cover, year 2000 (percent)",
+                           trans = scales::identity_trans(),
+                           breaks = seq(50, 100, 25),
+                           limits = c(50, 100),
+                           labels = scales::label_comma(big.mark =" ")),
+              sx = list(
+                        title = "Mean agricultural suitability index",
+                        trans = scales::identity_trans(),
+                        breaks = seq(0, 1e4, 2.5e3),
+                        limits = c(0, 1e4),
+                        labels = scales::label_comma(big.mark =" ")),
               dist_set.km = list(
                                  title = "Distance to settlements (km)",
                                  trans = scales::identity_trans(),
-                                 breaks = seq(0, 100, 25),
-                                 limits = c(0, 100),
+                                 breaks = seq(0, 3e2, 1e2),
+                                 limits = c(0, 3e2),
                                  labels = scales::label_comma(big.mark =" ")),
               dist_roads.km = list(
                                    title = "Distance to roads (km)",
                                    trans = scales::identity_trans(),
-                                   breaks = seq(0, 200, 50),
-                                   limits = c(0, 200),
+                                   breaks = seq(0, 2.5e2, 5e1),
+                                   limits = c(0, 2.25e2),
                                    labels = scales::label_comma(big.mark =" ")),
               dist_rivers.km = list(
                                     title = "Distance to rivers (km)",
                                     trans = scales::identity_trans(),
-                                    breaks = seq(0, 7.5, 2.5),
-                                    limits = c(0, 7.5),
+                                    breaks = seq(0, 10, 2.5),
+                                    limits = c(0, 10),
                                     labels = scales::label_comma(big.mark =" ")),
               dens_pop = list(
                               title = "Population density (individuals / km²)",
@@ -165,10 +190,9 @@ cov.scales <-
                                 title = "Road density (m / km²)",
                                 trans = scales::yj_trans(0),
                                 breaks = c(0, 10^(1:4)),
-                                limits = c(0, 1e4),
+                                limits = c(0, 1.75e3),
                                 labels = scales::label_comma(big.mark =" "))
               ))
-
 
 cat.lab <- 
   data.table(cat.label = c("All forests", "Primary forests",
@@ -284,7 +308,10 @@ if(!file.exists(file.data.vis) | overwrite == TRUE) {
   
   message("Covariates …")
 
-  cov.names <- c("dist_set", "dist_roads", "dist_rivers", "tri", "dens_roads", "dens_pop")
+  cov.names <-
+    c("elevation", "slope", "sx", "cover",
+      "dist_set", "dist_roads", "dist_rivers",
+      "dens_pop", "dens_roads")
   cov.trans.km <- c("dist_set", "dist_roads", "dist_rivers")
   cov.trans.names <- paste0(cov.trans.km, ".km")
 
@@ -539,10 +566,85 @@ png("../results/figures/fcne_covid_cov.png", width = 7, height = 4.5, unit = "in
 cov.combined
 dev.off()
 
+som.sum[[region]]$diff[sign(diff.q2.5) == sign(diff.q97.5)]
+
 # IUFRO
 
-png("../results/figures/fcne_covid_cov_diff.png", width = 4.5, height = 4.5, unit = "in", res = 600)
-  som.sum[[region]]$diff[is.na(year)] |>
+png("../results/figures/fcne_covid_cov_diff.png", width = 7, height = 3, unit = "in", res = 600)
+  som.sum[[region]]$diff |>
+  ggplot() +
+  geom_raster(mapping = aes(
+                            fill = diff.mean,
+                            x = som_x, y = som_y),
+              interpolate = FALSE) +
+  scale_fill_continuous_divergingx(palette = "Roma",
+                                   ,mid = 0
+                                   ,rev = TRUE,
+                                   ,breaks = seq(-0.01, 0.01, 0.005),
+                                   ,labels = c("≤ -1.0%", "-0.5%", "0%",
+                                               "+0.5%", "≥ +1.0%"),
+                                   ,limits = c(-0.01, 0.01)
+                                   ,oob = scales::squish
+                                   ) +
+  coord_fixed() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  map_guide_fill +
+  labs(fill = mar.title,
+       x = NULL, y = NULL) +
+  facet_grid(cols = vars(year.label), rows = vars(type.label), switch = "y") +
+  map_theme +
+  theme_leg_bottom
+  # theme(strip.text.y = element_blank(),
+  #       strip.background.y = element_blank())
+dev.off()
+
+  th.change <- 0.003
+
+  cov.sel <- names(cov.scales$amz)
+
+  som.comp.all <- copy(som.sum$amz$cov)
+  som.comp.all[, type := "all"]
+
+  som.comp.inc <-
+    som.sum$amz$cov[som.sum$amz$diff[is.na(year) & diff.mean > th.change, .(som_x, som_y)],
+                    on = c("som_x", "som_y")]
+  som.comp.inc[, type := "increase"]
+
+  sel.del <-
+    som.sum$amz$diff[!is.na(year), .(som_x, som_y, year = paste0("y", year), diff.mean)] |>
+    dcast(som_x + som_y ~ year) |>
+    _[(y2020 < -th.change & (y2021 > th.change | y2022 > th.change)) |
+      (y2021 < -th.change & y2022 > th.change),
+      .(som_x, som_y)]
+  som.comp.del <-
+    som.sum$amz$cov[sel.del, on = c("som_x", "som_y")]
+  som.comp.del[, type := "delayed"]
+
+  som.comp.dec <-
+    som.sum$amz$cov[som.sum$amz$diff[is.na(year) & diff.mean < -th.change, .(som_x, som_y)],
+                    on = c("som_x", "som_y")]
+  som.comp.dec[, type := "decrease"]
+
+  som.comp <- rbind(som.comp.all, som.comp.del, som.comp.inc, som.comp.dec)
+  som.comp[, type := factor(type, levels = c("all", "delayed", "increase", "decrease"))]
+  som.comp <-
+    melt(som.comp[, c("som_x", "som_y", "type", cov.sel), with = FALSE],
+         id.vars = c("som_x", "som_y", "type"),
+         measure.vars = cov.sel,
+         variable.name = "cov",
+         value.name = "value")
+
+  som.comp[, .(cov.mean = mean(value), cov.sd = sd(value), cov.med = median(value)), by = .(type, cov)]
+
+  ggplot(som.comp) +
+    geom_violin(aes(x = value, y = type)) +
+    facet_wrap(vars(cov), scales = "free_x") +
+    scale_x_continuous(trans = "log1p")
+
+
+
+  som.sum$amz$diff[is.na(year) & diff.mean < -0.001] |>
   ggplot() +
   geom_raster(mapping = aes(
                             fill = diff.mean,
@@ -562,12 +664,11 @@ png("../results/figures/fcne_covid_cov_diff.png", width = 4.5, height = 4.5, uni
   scale_y_continuous(expand = c(0, 0)) +
   map_guide_fill +
   labs(fill = mar.title, x = NULL, y = NULL) +
-  facet_grid(rows = vars(year.label), cols = vars(type.label), switch = "y") +
+  facet_grid(cols = vars(year.label), rows = vars(type.label), switch = "y") +
   map_theme +
   theme_leg_bottom
   # theme(strip.text.y = element_blank(),
   #       strip.background.y = element_blank())
-dev.off()
 
 diff.avg <- som.sum[[region]]$diff[is.na(year)]
 diff.avg[, diff.change := fcase(diff.mean > 0, "increase", diff.mean < 0, "decrease")]

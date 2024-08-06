@@ -169,11 +169,10 @@ p.adm <-
                        .width = c(0.5, 0.95)) +
     scale_colour_manual(values = col.type) +
     # coord_cartesian(ylim = c(0, fl.lim), expand = FALSE) +
-    coord_cartesian(ylim = c(0, 0.75), expand = FALSE) +
+    coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
     plot_theme
-
 p.adm
 
 png(file.fig.adm, width = 7, height = 1.75, unit = "in", res = 600)

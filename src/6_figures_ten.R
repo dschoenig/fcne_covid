@@ -180,14 +180,20 @@ png("../results/figures/fcne_covid_ten.png", width = 7, height = 1.75, unit = "i
   mar[type == "diff"] |>
   ggplot() +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
-    stat_pointinterval(aes(y = marginal*100, x = itpa.label, colour = itpa.label),
+    stat_pointinterval(aes(y = marginal, x = itpa.label, colour = itpa.label),
                        point_size = 1.25,
                        interval_size_range = c(0.5, 1.25), 
                        fatten_point = 1.25, shape = 21, fill = "white",
                        .width = c(0.5, 0.95)) +
     scale_colour_manual(values = col.type) +
-    coord_cartesian(ylim = c(-0.275, 0.05)) +
+    scale_y_continuous(labels = scales::label_percent()) +
+    coord_cartesian(ylim = c(-0.00275, 0.0005)) +
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
-    labs(x = NULL, y = "Annual forest loss rate (percent)", colour = NULL) +
+    labs(x = NULL,
+         y = "Absolute change in effectivness\n(difference in annual forest loss rate)",
+         colour = NULL) +
     plot_theme
 dev.off()
+
+
+labs(fill = ,

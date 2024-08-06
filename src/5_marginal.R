@@ -8,7 +8,7 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-pred_type <- tolower(as.character(args[3]))
+mar_type <- tolower(as.character(args[3]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -16,7 +16,6 @@ draws.eval.chunk <- 10
 
 # n.threads <- 4
 # region <- "amz"
-# pred_type <- "cf1"
 # draws.max <- 8
 # draws.load.chunk <- 4
 # draws.eval.chunk <- 2
@@ -29,13 +28,13 @@ path.base <- "../"
 path.som <- "../models/som/"
 path.data.proc <- paste0(path.base, "data/processed/")
 path.pred <- paste0(path.base, "models/gam/pred/")
-path.cf <- paste0(path.base, "models/cf/", region, "/")
+path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".rds")
-file.mar <- paste0(path.mar, region, ".ten.", pred_type, ".rds")
-path.arrow <- paste0(path.pred, region, "/", pred_type, "/")
+file.cf <- paste0(path.cf, region, ".", mar_type, ".rds")
+file.mar <- paste0(path.mar, region, ".", mar_type, ".rds")
+path.arrow <- paste0(path.pred, region, "/fac/")
 
 cf <- readRDS(file.cf)
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -43,11 +42,7 @@ pred.ds <- open_dataset(path.arrow, format = "arrow")
 draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
 group.chunks <- chunk_seq(1, nrow(cf$groups), 100)
 
-if(pred_type == "fac") {
-  id.var <- "id"
-} else {
-  id.var <- "cf.id"
-}
+id.var <- "id"
 
 eval.mar.i <- list()
 

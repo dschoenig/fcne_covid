@@ -6,9 +6,11 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
+pred_type <- tolower(as.character(args[3]))
 
 # n.threads <- 4
 # region <- "amz"
+# pred_type <- "mort"
 
 setDTthreads(n.threads)
 
@@ -22,31 +24,47 @@ if(!dir.exists(path.cf))
 
 file.data <- paste0(path.data.proc, region, ".data.proc.rds")
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.rds")
+file.out <- paste0(path.cf, region, ".ten.", pred_type, ".rds")
 
 
 id.var <- "id"
 var.sel <- c(id.var, "year", "for_type",
              "it_type", "pa_type", "pandemic",
+             "mort", "mortlag1",
              "som_bmu", "ed_east", "ed_north")
 
 data.cf <- readRDS(file.data)[, ..var.sel]
 
 som.fit <- readRDS(file.som)
 
+
+mort.breaks <- data.cf[, quantile(unique(mort), c(0, 0.25, 0.5, 0.75, 1))]
+mort.class.lab <- c("low", "moderate", "high", "very_high")
+cols.mort <- c("mort", "mortlag1")
+cols.mort.class <- paste0(cols.mort, ".class")
+
+data.cf[, 
+        (cols.mort.class) :=
+          lapply(.SD,
+                 \(x) cut(x, labels = mort.class.lab, breaks = mort.breaks,
+                          right = TRUE, include.lowest = TRUE)),
+        .SDcols = cols.mort]
+data.cf[pandemic == "no", (cols.mort.class) := NA]
+
 # data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
-cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
-fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
+if(pred_type == "mort") {
+  cf.ids <- data.cf[year <= 2019, id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[year >= 2020, id.col, env = list(id.col = id.var)]  
+}
+if(pred_type == "mortlag1") {
+  cf.ids <- data.cf[year <= 2019, id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[year >= 2021, id.col, env = list(id.col = id.var)]  
+}
 
-comp.by <- c("for_type", "year")
-group.by <- list(c("pandemic", "it_type"),
-                 c("pandemic", "year", "it_type"),
-                 c("pandemic", "pa_type"),
-                 c("pandemic", "year", "pa_type"),
-                 c("pandemic", "it_type", "pa_type"),
-                 c("pandemic", "year", "it_type", "pa_type"))
-
+mort.col <- paste0(pred_type, ".class")
+comp.by <- c("for_type", "it_type", "pa_type")
+group.by <- list(mort.col, c("year", mort.col))
 
 
 paste0("No. of data: ", nrow(data)) |>
