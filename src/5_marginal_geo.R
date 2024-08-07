@@ -8,11 +8,13 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-mar_type <- tolower(as.character(args[3]))
+pred_type <- tolower(as.character(args[3]))
+area_type <- tolower(as.character(args[4]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
 draws.eval.chunk <- 10
+eval.group.chunk <- 1e4
 
 # n.threads <- 4
 # region <- "amz"
@@ -32,17 +34,21 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".", mar_type, ".rds")
-file.mar <- paste0(path.mar, region, ".", mar_type, ".rds")
-path.arrow <- paste0(path.pred, region, "/fac/")
+file.cf <- paste0(path.cf, region, ".geo.", pred_type, ".", area_type, ".rds")
+file.mar <- paste0(path.mar, region, ".geo.", pred_type, ".", area_type, ".rds")
+path.arrow <- paste0(path.pred, region, "/", pred_type, "/")
 
 cf <- readRDS(file.cf)
 pred.ds <- open_dataset(path.arrow, format = "arrow")
 
 draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
-group.chunks <- chunk_seq(1, nrow(cf$groups), 100)
+group.chunks <- chunk_seq(1, nrow(cf$groups), eval.group.chunk)
 
-id.var <- "id"
+if(pred_type == "fac") {
+  id.var <- "id"
+} else {
+  id.var <- "cf.id"
+}
 
 eval.mar.i <- list()
 

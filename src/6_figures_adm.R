@@ -24,11 +24,13 @@ path.agg <- paste0(path.base, "models/gam/agg/", region, "/")
 path.figures <- paste0(path.base, "results/figures/")
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
-files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1", "cf2", "cf3", "cf4"), ".rds")
+files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1"), ".rds")
+# files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1", "cf2", "cf3", "cf4"), ".rds")
 # files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1", "cf2", "cf4"), ".rds")
 file.bl <- paste0(path.agg, region, ".bl.rds")
 
 
+file.fig.reg <- paste0(path.figures, region, ".reg.png")
 file.fig.adm <- paste0(path.figures, region, ".adm.png")
 file.data.vis <- paste0(path.data.vis, region, ".adm.rds")
 
@@ -101,16 +103,17 @@ adm_guide_fill <-
 
 
 type.lab <-
-  data.table(type = c("fac", "cf1", "cf4", "cf3", "cf2"),
+  data.table(type = c("fac", "cf1"),
+  # data.table(type = c("fac", "cf1", "cf4", "cf3", "cf2"),
              type.label = c("Factual\n(under COVID-19 pandemic)",
                             # "C₁: No pandemic",
                             # "C₂: No change in\nspatial intensity",
                             # "C₃: No modification of\ncovariate effects",
                             # "C₄: No mortality effect"))
-                            "Counterfactual 1:\nNo pandemic",
-                            "Counterfactual 2:\nNo change in spatial intensity",
-                            "Counterfactual 3:\nNo change of covariate effects",
-                            "Counterfactual 4:\nNo mortality effect"))
+                            "Counterfactual\n(pre-pandemic conditions)"))
+                            # "Counterfactual 2:\nNo change in spatial intensity",
+                            # "Counterfactual 3:\nNo change of covariate effects",
+                            # "Counterfactual 4:\nNo mortality effect"))
 type.lab[, type.label := factor(type.label, levels = type.label)]
 
 year.lab <-
@@ -132,8 +135,19 @@ reg.lab$amz[, reg.label := factor(reg.label, levels = reg.label)]
 
 
 
-col.type <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
+# col.type <- c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
+# names(col.type) <- type.lab$type.label
+
+col.type <- c("#D55E00", "#0072B2")
 names(col.type) <- type.lab$type.label
+# col.type <- c("#e41a1c", "#377eb8")
+# names(col.type) <- type.lab$type.label
+
+col.type.light <- c("#D55E004D", "#0072B24D")
+names(col.type.light) <- type.lab$type.label
+# col.type.light <- c("#e41a1c4d", "#377eb84d")
+# names(col.type.light) <- type.lab$type.label
+
 
 
 
@@ -149,11 +163,35 @@ setorder(agg, type.label, year.label, reg.label)
 #   readRDS(file.bl)
 # fl.bl <- bl[is.na(adm0) & is.na(year), mean(forestloss)]
 
-fl.bl <- agg[is.na(adm0) & type == "fac", .(forestloss.bl = mean(forestloss)), by = "year.label"]
+fl.bl <- agg[is.na(adm0) & type == "cf1", .(forestloss.bl = mean(forestloss)), by = "year.label"]
 
 fl.lim <- agg[is.na(adm0), max(forestloss)*100]
 
-p.adm <-
+# p.adm <-
+#   agg[is.na(adm0)] |>
+#   ggplot() +
+#     # geom_hline(yintercept = fl.bl * 100,
+#     #            linetype = "dashed", linewidth = 0.3) +
+#     geom_hline(data = fl.bl,
+#                aes(yintercept = forestloss.bl * 100),
+#                linetype = "dashed", linewidth = 0.3) +
+#     stat_pointinterval(aes(y = forestloss*100, x = type.label, colour = type.label),
+#                        point_interval = "mean_qi",
+#                        point_size = 1.25,
+#                        interval_size_range = c(0.5, 1.25), 
+#                        fatten_point = 1.25, shape = 21, fill = "white",
+#                        .width = c(0.5, 0.95)) +
+#     scale_colour_manual(values = col.type) +
+#     coord_cartesian(ylim = c(0.4, fl.lim), expand = FALSE) +
+#     # coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
+#     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
+#     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
+#     plot_theme
+# p.adm
+
+
+
+p.reg <-
   agg[is.na(adm0)] |>
   ggplot() +
     # geom_hline(yintercept = fl.bl * 100,
@@ -161,22 +199,71 @@ p.adm <-
     geom_hline(data = fl.bl,
                aes(yintercept = forestloss.bl * 100),
                linetype = "dashed", linewidth = 0.3) +
-    stat_pointinterval(aes(y = forestloss*100, x = type.label, colour = type.label),
+    stat_halfeye(aes(y = forestloss*100, x = type.label,
+                     colour = type.label,
+                     fill = type.label),
+                       scale = 0.5,
                        point_interval = "mean_qi",
-                       point_size = 1.25,
+                       point_size = 1,
                        interval_size_range = c(0.5, 1.25), 
-                       fatten_point = 1.25, shape = 21, fill = "white",
-                       .width = c(0.5, 0.95)) +
+                       fatten_point = 1.25, shape = 21,
+                       .width = c(0.5, 0.95),
+                       point_fill = "white",
+                       normalize = "panels"
+                 ) +
     scale_colour_manual(values = col.type) +
-    # coord_cartesian(ylim = c(0, fl.lim), expand = FALSE) +
-    coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
+    scale_fill_manual(values = col.type.light,
+                      # guide = guide_legend(override.aes = list(point_fill = NA, colour = NA))) +
+                      guide = "none") +
+    coord_cartesian(ylim = c(0.4, fl.lim), expand = TRUE) +
+    # coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
     plot_theme
-p.adm
+# p.reg
 
-png(file.fig.adm, width = 7, height = 1.75, unit = "in", res = 600)
-p.adm
+png(file.fig.reg, width = 7, height = 2.25, unit = "in", res = 600)
+p.reg
 dev.off()
 
 
+fl.bl.adm <- agg[!is.na(adm0) & type == "cf1",
+                 .(forestloss.bl = mean(forestloss)),
+                 by = c("year.label", "reg.label")]
+
+p.adm <-
+  agg[!is.na(adm0)] |>
+  ggplot() +
+    # geom_hline(yintercept = fl.bl * 100,
+    #            linetype = "dashed", linewidth = 0.3) +
+    geom_hline(data = fl.bl.adm,
+               aes(yintercept = forestloss.bl * 100),
+               linetype = "dashed", linewidth = 0.3) +
+    stat_halfeye(aes(y = forestloss*100, x = type.label,
+                     colour = type.label,
+                     fill = type.label),
+                       scale = 0.5,
+                       point_interval = "mean_qi",
+                       point_size = 1,
+                       interval_size_range = c(0.5, 1.25), 
+                       fatten_point = 1.25, shape = 21,
+                       .width = c(0.5, 0.95),
+                       point_fill = "white",
+                       normalize = "panels"
+                       # normalize = "xy"
+                 ) +
+    scale_colour_manual(values = col.type) +
+    scale_fill_manual(values = col.type.light,
+                      # guide = guide_legend(override.aes = list(point_fill = NA, colour = NA))) +
+                      guide = "none") +
+    # coord_cartesian(ylim = c(0.4, fl.lim), expand = TRUE) +
+    # coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
+    # facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
+    facet_grid(rows = vars(reg.label), cols = vars(year.label), scales = "free_y") +
+    labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
+    plot_theme
+# p.adm
+
+png(file.fig.adm, width = 7, height = 8, unit = "in", res = 600)
+p.adm
+dev.off()

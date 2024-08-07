@@ -7,16 +7,17 @@ source("utilities.R")
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
-adm <- tolower(as.character(args[4]))
+area_type <- tolower(as.character(args[4]))
 
 # n.threads <- 4
 # region <- "amz"
 # pred_type <- "fac"
-# adm <- "all"
+# area_type <- "it"
 
 
 setDTthreads(n.threads)
 
+map.res <- 2.5e4
 
 path.base <- "../"
 path.som <- "../models/som/"
@@ -34,7 +35,7 @@ if(pred_type == "fac") {
 }
 
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", adm, ".rds")
+file.out <- paste0(path.cf, region, ".geo.", pred_type, ".", area_type, ".rds")
 
 
 if(pred_type == "fac") {
@@ -50,9 +51,11 @@ if(pred_type == "fac") {
   }
 }
 
-var.sel <- c(id.var, "year", "for_type", "adm0",
+var.sel <- c(id.var, "year", "for_type",
              "it_type", "pa_type",
-             "som_bmu", "ed_east", "ed_north")
+             "som_bmu",
+             "ed_east", "ed_north",
+             "ea_east", "ea_north")
 
 data.cf <- data[, ..var.sel]
 rm(data)
@@ -64,31 +67,31 @@ data.cf <- readRDS(file.data)[, ..var.sel]
 
 som.fit <- readRDS(file.som)
 
-# data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
-cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
-fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
+map.anchor <- c(ea_east = floor(min(data.cf$ea_east / map.res)) * map.res,
+                ea_north = floor(min(data.cf$ea_north / map.res)) * map.res)
+
+data.cf <-
+  bin_cols(data.cf,
+           columns = c("ea_east", "ea_north"), bin.res = rep(map.res, 2),
+           bin.min = map.anchor, append = TRUE)
+
 
 comp.by <- c("for_type", "year")
+if(area_type == "it") {
+  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  
+}
+if(area_type == "pa") {
+  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[pa_type != "none", id.col, env = list(id.col = id.var)]  
+}
+if(area_type == "itpa") {
+  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
+}
 
-if(adm == "all") {
-  group.by <- list(
-                   "it_type",
-                   c("year", "it_type"),
-                   "pa_type",
-                   c("year", "pa_type"),
-                   c("it_type", "pa_type"),
-                   c("year", "it_type", "pa_type"))
-}
-if(adm == "adm0") {
-  group.by <- list(
-                   c("adm0", "it_type"),
-                   c("adm0", "year", "it_type"),
-                   c("adm0", "pa_type"),
-                   c("adm0", "year", "pa_type"),
-                   c("adm0", "it_type", "pa_type"),
-                   c("adm0", "year", "it_type", "pa_type"))
-}
+group.by <- list(c("ea_east.bin", "ea_north.bin"))
 
 
 paste0("No. of data: ", nrow(data)) |>

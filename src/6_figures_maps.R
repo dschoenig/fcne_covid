@@ -30,9 +30,10 @@ path.figures <- paste0(path.base, "results/figures/")
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
 file.limit <- paste0(path.data.raw, "forestloss/", region, ".limit.gpkg")
-file.areas <- paste0(path.data.raw, "forestloss/", region, ".areas_union.gpkg")
-file.bg.adm0 <- paste0(path.data, "auxiliary/gadm36_levels_neotropics.gpkg")
-cf.name <- "cf4"
+file.areas <- paste0(path.data.raw, "forestloss/", region, ".areas_union_2022.gpkg")
+file.bg.adm0 <- paste0(path.data, "auxiliary/gadm41_levels_neotropics.gpkg")
+file.bg.coasts <- paste0(path.data, "auxiliary/bg_coasts.gpkg")
+cf.name <- "cf1"
 files.agg <- paste0(path.agg, region, ".geo.", c("fac", cf.name), ".rds")
 
 file.fig.geo <- paste0(path.figures, region, ".geo.png")
@@ -184,8 +185,8 @@ if(!file.exists(file.data.vis) | overwrite == TRUE) {
 
   # Prepare data for maps
 
-  # bg_adm0 <- st_read(paste0(path.data, "auxiliary/gadm36_levels.gpkg"),
-  #                    query = "SELECT * FROM level0 
+  # bg_adm0 <- st_read(paste0(path.data, "auxiliary/gadm_410-levels.gpkg"),
+  #                    query = "SELECT * FROM ADM_0 
   #                             WHERE GID_0 IN ('ABW', 'AIA', 'ARG', 'ATG', 'BES', 
   #                                             'BHS', 'BLM', 'BLZ', 'BOL', 'BRA', 
   #                                             'BRB', 'CHL', 'COL', 'CRI', 'CUB', 
@@ -198,10 +199,17 @@ if(!file.exists(file.data.vis) | overwrite == TRUE) {
   #                                             'TTO', 'UMI', 'URY', 'VCT', 
   #                                             'VEN', 'VGB', 'VIR', 'XCL')"
   #                    )
+  # st_make_valid(bg_adm0) |>
+  # st_write(file.bg.adm0, append = FALSE)
+  # bg_coasts <-
+  #   st_make_valid(bg_adm0) |>
+  #   st_union() |>
+  #   st_exterior_ring()
+  # st_write(bg_coasts, file.bg.coasts)
 
   bg_adm0 <- st_read(file.bg.adm0)
+  bg_coasts <- st_read(file.bg.coasts)
 
-  bg_coasts <- st_union(bg_adm0, is_coverage = TRUE)
 
   # Treatment of auxilary geospatial data
 
@@ -460,6 +468,8 @@ geo.sum[[region]]$diff$type.label <- "Difference\n(factual vs. counterfactual)"
 
 maps[[region]]$diff <- 
   geo.sum[[region]]$diff |>
+  # geo.sum[[region]]$diff[diff.q2.5 != diff.q97.5 & sign(diff.q2.5) == sign(diff.q97.5)] |>
+  # geo.sum[[region]]$diff[diff.q25 != diff.q75 & sign(diff.q25) == sign(diff.q75)] |>
   ggplot() +
   geom_sf(data = poly[[region]]$bg, fill = "grey30", colour = NA) +
   geom_raster(mapping = aes(

@@ -643,6 +643,31 @@ dev.off()
     scale_x_continuous(trans = "log1p")
 
 
+  som.sel <- som.comp[type == "delayed", .(som_x, som_y)]
+  som.sum[[region]]$diff[som.sel, on = c("som_x", "som_y")] |>
+  ggplot() +
+  geom_raster(mapping = aes(
+                            fill = diff.mean,
+                            x = som_x, y = som_y),
+              interpolate = FALSE) +
+  scale_fill_continuous_divergingx(palette = "Roma",
+                                   ,mid = 0
+                                   ,rev = TRUE,
+                                   ,breaks = seq(-0.01, 0.01, 0.005),
+                                   ,labels = c("≤ -1.0%", "-0.5%", "0%",
+                                               "+0.5%", "≥ +1.0%"),
+                                   ,limits = c(-0.01, 0.01)
+                                   ,oob = scales::squish
+                                   ) +
+  coord_fixed() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  map_guide_fill +
+  labs(fill = mar.title,
+       x = NULL, y = NULL) +
+  facet_grid(cols = vars(year.label), rows = vars(type.label), switch = "y") +
+  map_theme +
+  theme_leg_bottom
 
   som.sum$amz$diff[is.na(year) & diff.mean < -0.001] |>
   ggplot() +
