@@ -267,3 +267,14 @@ p.adm <-
 png(file.fig.adm, width = 7, height = 8, unit = "in", res = 600)
 p.adm
 dev.off()
+
+
+# merge(agg[is.na(adm0) & year > 2020 & type == "cf1", .(bl = mean(forestloss)), by = "year"],
+#       agg[is.na(adm0) & year > 2020 & type == "fac", .(lossrate = mean(forestloss)), by = "year"]) |>
+# _[, .(lossyear = year, lossrate.diff = lossrate - bl, lossrate.diff.rel = (lossrate-bl)/bl)]
+
+
+
+
+
+

@@ -1,4 +1,3 @@
-
 args <- commandArgs(trailingOnly = TRUE)
 
 library(data.table)
@@ -9,7 +8,7 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-mort_type <- tolower(as.character(args[3]))
+pred_type <- tolower(as.character(args[3]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -33,8 +32,8 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".covid.", mor_type, ".rds")
-file.mar <- paste0(path.mar, region, ".covid.", mor_type, ".rds")
+file.cf <- paste0(path.cf, region, ".covid.", pred_type, ".rds")
+file.mar <- paste0(path.mar, region, ".covid.", pred_type, ".rds")
 path.arrow <- paste0(path.pred, region, "/fac/")
 
 cf <- readRDS(file.cf)
