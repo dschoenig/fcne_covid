@@ -7,12 +7,12 @@ source("utilities.R")
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
-adm <- tolower(as.character(args[4]))
+area_type <- tolower(as.character(args[4]))
 
 # n.threads <- 4
 # region <- "amz"
 # pred_type <- "fac"
-# adm <- "all"
+# area_type <- "itpa"
 
 
 setDTthreads(n.threads)
@@ -34,7 +34,7 @@ if(pred_type == "fac") {
 }
 
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", adm, ".rds")
+file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, ".rds")
 
 
 if(pred_type == "fac") {
@@ -66,30 +66,35 @@ som.fit <- readRDS(file.som)
 
 # data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
-cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
-fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
-
 comp.by <- c("for_type", "year")
 
-if(adm == "all") {
+if(area_type == "it") {
+  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  
   group.by <- list(
                    "it_type",
                    c("year", "it_type"),
+                   c("adm0", "it_type"),
+                   c("adm0", "year", "it_type"))
+}
+if(area_type == "pa") {
+  cf.ids <- data.cf[pa_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[pa_type != "none", id.col, env = list(id.col = id.var)]  
+  group.by <- list(
                    "pa_type",
                    c("year", "pa_type"),
-                   c("it_type", "pa_type"),
-                   c("year", "it_type", "pa_type"))
-}
-if(adm == "adm0") {
-  group.by <- list(
-                   c("adm0", "it_type"),
-                   c("adm0", "year", "it_type"),
                    c("adm0", "pa_type"),
-                   c("adm0", "year", "pa_type"),
+                   c("adm0", "year", "pa_type"))
+}
+if(area_type == "itpa") {
+  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
+  group.by <- list(
+                   c("it_type", "pa_type"),
+                   c("year", "it_type", "pa_type"),
                    c("adm0", "it_type", "pa_type"),
                    c("adm0", "year", "it_type", "pa_type"))
 }
-
 
 paste0("No. of data: ", nrow(data)) |>
 message()

@@ -9,7 +9,7 @@ source("utilities.R")
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
-adm <- tolower(as.character(args[4]))
+area_type <- tolower(as.character(args[4]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -33,8 +33,8 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".", adm, ".rds")
-file.mar <- paste0(path.mar, region, ".ten.", pred_type, ".", adm, ".rds")
+file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, ".rds")
+file.mar <- paste0(path.mar, region, ".ten.", pred_type, ".", area_type, ".rds")
 path.arrow <- paste0(path.pred, region, "/", pred_type, "/")
 
 cf <- readRDS(file.cf)
