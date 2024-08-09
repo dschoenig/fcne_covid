@@ -62,9 +62,6 @@ rm(data)
 silence <- gc()
 data.cf[, year := factor(as.character(year))]
 
-
-data.cf <- readRDS(file.data)[, ..var.sel]
-
 som.fit <- readRDS(file.som)
 
 
