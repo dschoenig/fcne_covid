@@ -78,17 +78,25 @@ comp.by <- c("for_type", "year")
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  
+  group.by <- list(c("ea_east.bin", "ea_north.bin"),
+                   c("year", "ea_east.bin", "ea_north.bin"))
+                   # c("ea_east.bin", "ea_north.bin", "it_type"),
+                   # c("year", "ea_east.bin", "ea_north.bin", "it_type"))
 }
 if(area_type == "pa") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[pa_type != "none", id.col, env = list(id.col = id.var)]  
+  group.by <- list(c("ea_east.bin", "ea_north.bin"),
+                   c("year", "ea_east.bin", "ea_north.bin"))
+                   # c("ea_east.bin", "ea_north.bin", "pa_type"),
+                   # c("year", "ea_east.bin", "ea_north.bin", "pa_type"))
 }
 if(area_type == "itpa") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
+  group.by <- list(c("ea_east.bin", "ea_north.bin"),
+                   c("year", "ea_east.bin", "ea_north.bin"))
 }
-
-group.by <- list(c("ea_east.bin", "ea_north.bin"))
 
 
 paste0("No. of data: ", nrow(data)) |>
