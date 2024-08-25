@@ -17,8 +17,8 @@ n.cores <- as.integer(args[2])
 # n.cores <- 4
 
 # SOM parameters
-x.dim <- 100
-y.dim <- 100
+x.dim <- 50
+y.dim <- 50
 epochs <- 1000
 
 seed <- 19120623
