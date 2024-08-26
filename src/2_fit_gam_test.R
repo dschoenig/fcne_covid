@@ -40,7 +40,7 @@ max.knots.reg <- list(amz = c(loc.bl = 2e4,
                               loc.itpa = 2e4,
                               loc.ov = 2e4,
                               mort = NULL,
-                              som = 2e5))
+                              som = 2e4))
 # max.knots.reg <- list(cam = c(k.reg$cam[1:3] * 10, som = 10000),
 #                       amz = c(k.reg$amz[1:3] * 10, som = 10000))
 
@@ -65,7 +65,7 @@ data.mod <- data.proc[, ..vars.mod]
 setDT(data.mod)
 rm(data.proc)
 
-data.mod[year := factor(year)]
+data.mod[,year := factor(year)]
 
 k.def <- k.reg[[model.reg]]
 max.knots.def <- max.knots.reg[[model.reg]]
@@ -94,25 +94,25 @@ if(model.id == 1) {
     bam(disturbance ~
           # Tenure effects, continuous variation over geographic location
           s(ed_east, ed_north, bs = 'gp',
-            k = k.def["ten_loc.bl"],
-            xt = list(max.knots = max.knots.def["ten_loc.bl"])) +
+            k = k.def$loc.bl,
+            xt = list(max.knots = max.knots.def$loc.bl)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = it_type, k = k.def["ten_loc.itpa"],
-            xt = list(max.knots = max.knots.def["ten_loc.itpa"])) +
+            by = it_type, k = k.def$loc.itpa,
+            xt = list(max.knots = max.knots.def$loc.itpa)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = pa_type, k = k.def["ten_loc.itpa"],
-            xt = list(max.knots = max.knots.def["ten_loc.itpa"])) +
+            by = pa_type, k = k.def$loc.itpa,
+            xt = list(max.knots = max.knots.def$loc.itpa)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = overlap, k = k.def["ten_loc.ov"],
-            xt = list(max.knots = max.knots.def["ten_loc.ov"])) +
+            by = overlap, k = k.def$loc.ov,
+            xt = list(max.knots = max.knots.def$loc.ov)) +
           # Tenure effects, discontinuous variation between countries
           s(adm0, bs = "re") +
           s(adm0, it_type, bs = "re") +
           s(adm0, pa_type, bs = "re") +
           s(adm0, it_type, pa_type, bs = "re") +
           # Covariates
-          s(som_x, som_y, bs = 'gp', k = k.def["som"],
-            xt = list(max.knots = max.knots.def["som"])),
+          s(som_x, som_y, bs = 'gp', k = k.def$som,
+            xt = list(max.knots = max.knots.def$som)),
         family = binomial(link = "cloglog"),
         data = data.mod[year == "2017"],
         select = TRUE,
@@ -128,25 +128,25 @@ if(model.id == 2) {
     bam(disturbance ~
           # Tenure effects, continuous variation over geographic location
           s(ed_east, ed_north, bs = 'gp',
-            k = k.def["ten_loc.bl"],
-            xt = list(max.knots = max.knots.def["ten_loc.bl"])) +
+            k = k.def$loc.bl,
+            xt = list(max.knots = max.knots.def$loc.bl)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = it_type, k = k.def["ten_loc.itpa"],
-            xt = list(max.knots = max.knots.def["ten_loc.itpa"])) +
+            by = it_type, k = k.def$loc.itpa,
+            xt = list(max.knots = max.knots.def$loc.itpa)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = pa_type, k = k.def["ten_loc.itpa"],
-            xt = list(max.knots = max.knots.def["ten_loc.itpa"])) +
+            by = pa_type, k = k.def$loc.itpa,
+            xt = list(max.knots = max.knots.def$loc.itpa)) +
           s(ed_east, ed_north, bs = 'gp',
-            by = overlap, k = k.def["ten_loc.ov"],
-            xt = list(max.knots = max.knots.def["ten_loc.ov"])) +
+            by = overlap, k = k.def$loc.ov,
+            xt = list(max.knots = max.knots.def$loc.ov)) +
           # Tenure effects, discontinuous variation between countries
           s(adm0, bs = "re") +
           s(adm0, it_type, bs = "re") +
           s(adm0, pa_type, bs = "re") +
           s(adm0, it_type, pa_type, bs = "re") +
           # Covariates
-          s(som_x, som_y, bs = 'gp', k = k.def["som"],
-            xt = list(max.knots = max.knots.def["som"])),
+          s(som_x, som_y, bs = 'gp', k = k.def$som,
+            xt = list(max.knots = max.knots.def$som)),
         family = binomial(link = "cloglog"),
         data = data.mod[year == "2022"],
         select = TRUE,
@@ -155,7 +155,6 @@ if(model.id == 2) {
         control = gam.control(trace = TRUE, epsilon = conv.eps)
     )
 }
-
 
 model
 summary(model, re.test = FALSE)
