@@ -19,7 +19,6 @@ data <-
   _[,
     .(year,
       adm0,
-      for_type,
       it_type,
       it_type_2017, it_type_2018, it_type_2019,
       it_type_2020, it_type_2021, it_type_2022,
