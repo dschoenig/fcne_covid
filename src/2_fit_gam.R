@@ -126,7 +126,7 @@ for(i in seq_along(y.seq)) {
   d.vars.new <- paste0("y", y.seq[i], ".", d.vars)
   y.dict.dummy.l[[i]] <- copy(dict.dummy)
   y.dict.dummy.l[[i]][, year := y.seq[i]]
-  setnames(y.dict.dummy.l[[i]], d.vars.old, d.vars.new)
+  setnames(y.dict.dummy.l[[i]], d.vars, d.vars.new)
 }
 
 y.dict.dummy <- rbindlist(y.dict.dummy.l, fill = TRUE)
