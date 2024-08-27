@@ -25,7 +25,9 @@ if(length(args) < 4) {
 
 # model.reg <- "amz"
 # model.id <- 1
-# n.threads <- c(2,1)
+# model.resp <- "def"
+# # n.threads <- c(2,1)
+# n.threads <- 4
 
 
 if(!dir.exists(path.gam))
@@ -67,6 +69,7 @@ var.resp <-
 
 vars.mod <-
   c(var.resp,
+    "year",
     "it_type", "pa_type", "overlap",
     "ed_east", "ed_north", "adm0",
     "som_x", "som_y",
@@ -76,7 +79,6 @@ vars.mod <-
 
 data.proc <- readRDS(file.data.proc)
 data.mod <- data.proc[, ..vars.mod]
-setDT(data.mod)
 rm(data.proc)
 
 data.mod[,year := factor(year)]
