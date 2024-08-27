@@ -29,7 +29,7 @@ file.post <- paste0(path.gam, region, ".m1.", model_resp, ".post.rds")
 
 
 var.resp <-
-  switch(model.resp,
+  switch(model_resp,
          "def" = "deforestation",
          "deg" = "degradation",
          "dis" = "disturbance")
