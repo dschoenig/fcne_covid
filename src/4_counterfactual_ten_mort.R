@@ -1,3 +1,4 @@
+
 args <- commandArgs(trailingOnly = TRUE)
 
 library(data.table)
@@ -6,18 +7,18 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-pred_type <- tolower(as.character(args[3]))
+mort_type <- tolower(as.character(args[3]))
 area_type <- tolower(as.character(args[4]))
+
 
 # n.threads <- 4
 # region <- "amz"
-# pred_type <- "fac"
-# area_type <- "it"
+# mort_type <- "mort"
+# area_type <- "itpa"
 
 
 setDTthreads(n.threads)
 
-map.res <- 2.5e4
 
 path.base <- "../"
 path.som <- "../models/som/"
@@ -26,77 +27,67 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 if(!dir.exists(path.cf))
   dir.create(path.cf, recursive = TRUE)
 
-if(pred_type == "fac") {
-  id.var <- "id"
-  file.data <- paste0(path.data.proc, region, ".data.proc.rds")
-} else {
-  id.var <- "cf.id"
-  file.data <- paste0(path.data.proc, region, ".data.", pred_type, ".rds")
-}
-
+id.var <- "id"
+file.data <- paste0(path.data.proc, region, ".data.proc.rds")
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".geo.", pred_type, ".", area_type, ".rds")
+file.out <- paste0(path.cf, region, ".ten_", mort_type, ".", area_type, ".rds")
 
 
-if(pred_type == "fac") {
-  id.var <- "id"
-  data <-
-    readRDS(file.data) |>
-    _[year >= 2020]
-} else {
-  id.var <- "cf.id"
-  data <- readRDS(file.data)
-  if(pred_type %in% c("cf1")) {
-    data[, year := year.fac]
-  }
-}
+data <- readRDS(file.data)
 
-var.sel <- c(id.var, "year",
+var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
-             "som_bmu",
-             "ed_east", "ed_north",
-             "ea_east", "ea_north")
+             "mort", "mortlag1", "pandemic",
+             "som_bmu", "ed_east", "ed_north")
 
-data.cf <- data[, ..var.sel]
+data.cf <- data[year >= 2020, ..var.sel]
 rm(data)
 silence <- gc()
 data.cf[, year := factor(as.character(year))]
 
 som.fit <- readRDS(file.som)
 
+mort.breaks <- data.cf[, quantile(unique(mort), c(0, 0.2, 0.4, 0.6, 0.8, 1))]
+mort.class.lab <- c("quint1", "quint2", "quint3", "quint4", "quint5")
+cols.mort <- c("mort", "mortlag1")
+cols.mort.class <- paste0(cols.mort, ".class")
 
-map.anchor <- c(ea_east = floor(min(data.cf$ea_east / map.res)) * map.res,
-                ea_north = floor(min(data.cf$ea_north / map.res)) * map.res)
+data.cf[, 
+        (cols.mort.class) :=
+          lapply(.SD,
+                 \(x) cut(x, labels = mort.class.lab, breaks = mort.breaks,
+                          right = TRUE, include.lowest = TRUE)),
+        .SDcols = cols.mort]
+data.cf[pandemic == "no", (cols.mort.class) := NA]
 
-data.cf <-
-  bin_cols(data.cf,
-           columns = c("ea_east", "ea_north"), bin.res = rep(map.res, 2),
-           bin.min = map.anchor, append = TRUE)
 
+# data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
+mort.col <- paste0(mort_type, ".class")
 comp.by <- c("year")
+
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
-                   # c("ea_east.bin", "ea_north.bin", "it_type"),
-                   # c("year", "ea_east.bin", "ea_north.bin", "it_type"))
+  group.by <- list(
+                   c(mort.col, "it_type"),
+                   c(mort.col, "year", "it_type"))
 }
 if(area_type == "pa") {
-  cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
+  cf.ids <- data.cf[pa_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[pa_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
-                   # c("ea_east.bin", "ea_north.bin", "pa_type"),
-                   # c("year", "ea_east.bin", "ea_north.bin", "pa_type"))
+  group.by <- list(
+                   c(mort.col, "pa_type"),
+                   c(mort.col, "year", "pa_type"))
 }
 if(area_type == "itpa") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
+  group.by <- list(
+                   c(mort.col, "it_type", "pa_type"),
+                   c(mort.col, "year", "it_type", "pa_type"))
 }
+
 
 
 paste0("No. of data: ", nrow(data.cf)) |>

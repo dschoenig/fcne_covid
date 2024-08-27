@@ -28,7 +28,7 @@ file.out <- paste0(path.cf, region, ".covid.", pred_type, ".rds")
 
 
 id.var <- "id"
-var.sel <- c(id.var, "year", "for_type",
+var.sel <- c(id.var, "year",
              "it_type", "pa_type", "pandemic",
              "mort", "mortlag1",
              "som_bmu", "ed_east", "ed_north")
@@ -38,8 +38,8 @@ data.cf <- readRDS(file.data)[, ..var.sel]
 som.fit <- readRDS(file.som)
 
 
-mort.breaks <- data.cf[, quantile(unique(mort), c(0, 0.25, 0.5, 0.75, 1))]
-mort.class.lab <- c("low", "moderate", "high", "very_high")
+mort.breaks <- data.cf[, quantile(unique(mort), c(0, 0.2, 0.4, 0.6, 0.8, 1))]
+mort.class.lab <- c("quint1", "quint2", "quint3", "quint4", "quint5")
 cols.mort <- c("mort", "mortlag1")
 cols.mort.class <- paste0(cols.mort, ".class")
 
@@ -63,11 +63,11 @@ if(pred_type == "mortlag1") {
 }
 
 mort.col <- paste0(pred_type, ".class")
-comp.by <- c("for_type", "it_type", "pa_type")
+comp.by <- c("it_type", "pa_type")
 group.by <- list(mort.col, c("year", mort.col))
 
 
-paste0("No. of data: ", nrow(data)) |>
+paste0("No. of data: ", nrow(data.cf)) |>
 message()
 
 paste0("No. of factual observations: ", length(fac.ids)) |>

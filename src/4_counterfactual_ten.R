@@ -50,7 +50,7 @@ if(pred_type == "fac") {
   }
 }
 
-var.sel <- c(id.var, "year", "for_type", "adm0",
+var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
              "som_bmu", "ed_east", "ed_north")
 
@@ -63,7 +63,7 @@ som.fit <- readRDS(file.som)
 
 # data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
-comp.by <- c("for_type", "year")
+comp.by <- c("year")
 
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
@@ -93,7 +93,7 @@ if(area_type == "itpa") {
                    c("adm0", "year", "it_type", "pa_type"))
 }
 
-paste0("No. of data: ", nrow(data)) |>
+paste0("No. of data: ", nrow(data.cf)) |>
 message()
 
 paste0("No. of factual observations: ", length(fac.ids)) |>
