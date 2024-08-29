@@ -27,6 +27,7 @@ setDTthreads(n.threads)
 set_cpu_count(n.threads)
 
 paste0("Settings: ", paste(pred_type, resp_type, area_type, sep = ", ")) |>
+message()
 
 path.base <- "../"
 path.som <- "../models/som/"

@@ -18,7 +18,8 @@ draws.eval.chunk <- 10
 
 # n.threads <- 1
 # region <- "amz"
-# pred_type <- "cf1"
+# resp_type <- "dis"
+# pred_type <- "fac"
 # draws.max <- 8
 # draws.load.chunk <- 4
 # draws.eval.chunk <- 2
