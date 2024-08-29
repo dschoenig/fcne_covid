@@ -94,7 +94,7 @@ for(i in seq_along(draw.chunks.load$from)) {
   pred.draw <-
     pred.ds |>
     filter(.draw >= draw.chunks.load$from[i] & .draw <= draw.chunks.load$to[i]) |>
-    select(.draw, all_of(id.var), forestloss) |>
+    select(all_of(select.var)) |>
     collect() |>
     merge(data[, ..merge.cols],
           by = id.var, all.x = FALSE)
