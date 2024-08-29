@@ -8,7 +8,7 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-
+resp_type <- tolower(as.character(args[3]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -33,9 +33,9 @@ if(!dir.exists(path.agg))
   dir.create(path.agg, recursive = TRUE)
 
 file.data <- paste0(path.data.proc, region, ".data.proc.rds")
-path.arrow <- paste0(path.pred, region, "/fac/")
+path.arrow <- paste0(path.pred, region, "/", resp_type, "/fac/")
 
-file.agg <- paste0(path.agg, region, ".bl.rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".bl.rds")
 
 
 id.var <- "id"
@@ -72,6 +72,13 @@ pred.ds <- open_dataset(path.arrow, format = "arrow")
 
 draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
 
+resp.var <-
+  switch(resp_type,
+         "def" = "deforestation",
+         "deg" = "degradation",
+         "dis" = "disturbance")
+
+select.var <- c(".draw", id.var, resp.var)
 
 eval.agg.i <- list()
 
@@ -91,6 +98,8 @@ for(i in seq_along(draw.chunks.load$from)) {
     collect() |>
     merge(data[, ..merge.cols],
           by = id.var, all.x = FALSE)
+
+  pred.draw[, resp.col := as.numeric(resp.col), env = list(resp.col = resp.var)]
 
   draw.chunks.eval <-
     chunk_seq(draw.chunks.load$from[i],
@@ -119,8 +128,8 @@ for(i in seq_along(draw.chunks.load$from)) {
       .aggregate_variables(pred.draw.j,
                          ids = groups[[id.var]],
                          id.var = id.var,
-                         pred.var = "forestloss",
-                         agg.name = "forestloss",
+                         pred.var = resp.var,
+                         agg.name = resp.var,
                          agg.size = 1e6,
                          parallel = n.threads)
 

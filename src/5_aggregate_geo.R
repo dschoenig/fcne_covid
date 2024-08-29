@@ -8,7 +8,8 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-pred_type <- as.character(args[3])
+resp_type <- tolower(as.character(args[3]))
+pred_type <- as.character(args[4])
 
 
 draws.max <- 1000
@@ -36,13 +37,12 @@ if(!dir.exists(path.agg))
 
 if(pred_type == "fac") {
   file.data <- paste0(path.data.proc, region, ".data.proc.rds")
-  path.arrow <- paste0(path.pred, region, "/fac/")
 } else {
   file.data <- paste0(path.data.proc, region, ".data.", pred_type, ".rds")
-  path.arrow <- paste0(path.pred, region, "/", pred_type, "/")
 }
+path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
-file.agg <- paste0(path.agg, region, ".geo.", pred_type, ".rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".geo.", pred_type, ".rds")
 
 map.res <- 2.5e4
 
@@ -97,6 +97,13 @@ pred.ds <- open_dataset(path.arrow, format = "arrow")
 
 draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
 
+resp.var <-
+  switch(resp_type,
+         "def" = "deforestation",
+         "deg" = "degradation",
+         "dis" = "disturbance")
+
+select.var <- c(".draw", id.var, resp.var)
 
 eval.agg.i <- list()
 
@@ -112,10 +119,12 @@ for(i in seq_along(draw.chunks.load$from)) {
   pred.draw <-
     pred.ds |>
     filter(.draw >= draw.chunks.load$from[i] & .draw <= draw.chunks.load$to[i]) |>
-    select(.draw, all_of(id.var), forestloss) |>
+    select(all_of(select.var)) |>
     collect() |>
     merge(data[, ..merge.cols],
           by = id.var, all.x = FALSE)
+
+  pred.draw[, resp.col := as.numeric(resp.col), env = list(resp.col = resp.var)]
 
   draw.chunks.eval <-
     chunk_seq(draw.chunks.load$from[i],
@@ -144,8 +153,8 @@ for(i in seq_along(draw.chunks.load$from)) {
       .aggregate_variables(pred.draw.j,
                          ids = groups[[id.var]],
                          id.var = id.var,
-                         pred.var = "forestloss",
-                         agg.name = "forestloss",
+                         pred.var = resp.var,
+                         agg.name = resp.var,
                          agg.size = 1e6,
                          parallel = n.threads)
 
