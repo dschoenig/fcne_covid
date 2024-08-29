@@ -599,20 +599,46 @@ png("../results/figures/fcne_covid_cov_diff.png", width = 7, height = 3, unit = 
   #       strip.background.y = element_blank())
 dev.off()
 
-  th.change <- 0.003
+  th.change <- 0.001
+  ci.cols <- c("diff.q75", "diff.q75")
 
   cov.sel <- names(cov.scales$amz)
 
   som.comp.all <- copy(som.sum$amz$cov)
   som.comp.all[, type := "all"]
 
+  sel.inc <-
+    som.sum$amz$diff[sign(ci.col1) == sign(ci.col2),
+                     env = list(ci.col1 = ci.cols[1],
+                                ci.col2 = ci.cols[2]),
+                     ][!is.na(year),
+                       .(som_x, som_y, year = paste0("y", year), diff.mean)] |>
+    dcast(som_x + som_y ~ year) |>
+    _[y2020 > th.change & y2021 > th.change & y2022 > th.change,
+      .(som_x, som_y)]
   som.comp.inc <-
-    som.sum$amz$cov[som.sum$amz$diff[is.na(year) & diff.mean > th.change, .(som_x, som_y)],
-                    on = c("som_x", "som_y")]
+    som.sum$amz$cov[sel.inc, on = c("som_x", "som_y")]
   som.comp.inc[, type := "increase"]
 
+  sel.dec <-
+    som.sum$amz$diff[sign(ci.col1) == sign(ci.col2),
+                     env = list(ci.col1 = ci.cols[1],
+                                ci.col2 = ci.cols[2]),
+                     ][!is.na(year),
+                       .(som_x, som_y, year = paste0("y", year), diff.mean)] |>
+    dcast(som_x + som_y ~ year) |>
+    _[y2020 < th.change & y2021 < th.change & y2022 < th.change,
+      .(som_x, som_y)]
+  som.comp.dec <-
+    som.sum$amz$cov[sel.dec, on = c("som_x", "som_y")]
+  som.comp.dec[, type := "decrease"]
+
   sel.del <-
-    som.sum$amz$diff[!is.na(year), .(som_x, som_y, year = paste0("y", year), diff.mean)] |>
+    som.sum$amz$diff[sign(ci.col1) == sign(ci.col2),
+                     env = list(ci.col1 = ci.cols[1],
+                                ci.col2 = ci.cols[2]),
+                     ][!is.na(year),
+                       .(som_x, som_y, year = paste0("y", year), diff.mean)] |>
     dcast(som_x + som_y ~ year) |>
     _[(y2020 < -th.change & (y2021 > th.change | y2022 > th.change)) |
       (y2021 < -th.change & y2022 > th.change),
@@ -620,11 +646,6 @@ dev.off()
   som.comp.del <-
     som.sum$amz$cov[sel.del, on = c("som_x", "som_y")]
   som.comp.del[, type := "delayed"]
-
-  som.comp.dec <-
-    som.sum$amz$cov[som.sum$amz$diff[is.na(year) & diff.mean < -th.change, .(som_x, som_y)],
-                    on = c("som_x", "som_y")]
-  som.comp.dec[, type := "decrease"]
 
   som.comp <- rbind(som.comp.all, som.comp.del, som.comp.inc, som.comp.dec)
   som.comp[, type := factor(type, levels = c("all", "delayed", "increase", "decrease"))]
@@ -643,7 +664,9 @@ dev.off()
     scale_x_continuous(trans = "log1p")
 
 
-  som.sel <- som.comp[type == "delayed", .(som_x, som_y)]
+  # som.sel <- unique(som.comp[type == "delayed", .(som_x, som_y)])
+  # som.sel <- unique(som.comp[type == "increase", .(som_x, som_y)])
+  som.sel <- unique(som.comp[type == "decrease", .(som_x, som_y)])
   som.sum[[region]]$diff[som.sel, on = c("som_x", "som_y")] |>
   ggplot() +
   geom_raster(mapping = aes(

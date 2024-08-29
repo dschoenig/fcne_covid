@@ -8,7 +8,8 @@ source("utilities.R")
 
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
-pred_type <- tolower(as.character(args[3]))
+resp_type <- tolower(as.character(args[3]))
+pred_type <- tolower(as.character(args[4]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -33,8 +34,8 @@ path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
 file.cf <- paste0(path.cf, region, ".covid.", pred_type, ".rds")
-file.mar <- paste0(path.mar, region, ".covid.", pred_type, ".rds")
-path.arrow <- paste0(path.pred, region, "/fac/")
+file.mar <- paste0(path.mar, region, ".", resp_type, ".covid.", pred_type, ".rds")
+path.arrow <- paste0(path.pred, region, "/", resp_type, "/fac/")
 
 cf <- readRDS(file.cf)
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -43,6 +44,14 @@ draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
 group.chunks <- chunk_seq(1, nrow(cf$groups), 100)
 
 id.var <- "id"
+
+resp.var <-
+  switch(resp_type,
+         "def" = "deforestation",
+         "deg" = "degradation",
+         "dis" = "disturbance")
+
+select.var <- c(".draw", id.var, resp.var)
 
 eval.mar.i <- list()
 
@@ -58,7 +67,7 @@ for(i in seq_along(draw.chunks.load$from)) {
   pred.draw <-
     pred.ds |>
     filter(.draw >= draw.chunks.load$from[i] & .draw <= draw.chunks.load$to[i]) |>
-    select(.draw, any_of(id.var), forestloss) |>
+    select(all_of(select.var)) |>
     collect()
   
   draw.chunks.eval <-
@@ -88,7 +97,7 @@ for(i in seq_along(draw.chunks.load$from)) {
       egp_evaluate_factual(predictions = pred.draw.j,
                            cf.def = cf,
                            name = "factual",
-                           pred.var = "forestloss",
+                           pred.var = resp.var,
                            draw.chunk = NULL,
                            agg.size = 1e6,
                            parallel = n.threads,
@@ -112,7 +121,7 @@ for(i in seq_along(draw.chunks.load$from)) {
                                     cf.def = cf,
                                     name = "counterfactual",
                                     group.eval = group.chunks$from[k]:group.chunks$to[k],
-                                    pred.var = "forestloss",
+                                    pred.var = resp.var,
                                     draw.chunk = NULL,
                                     agg.size = 1e6,
                                     parallel = n.threads,

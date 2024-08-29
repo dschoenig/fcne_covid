@@ -25,8 +25,13 @@ path.figures <- paste0(path.base, "results/figures/")
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
 names.mar <- c("fac", "cf1")
-files.mar <- paste0(path.mar, region, ".ten.", names.mar, ".rds")
+files.mar <- c(paste0(path.mar, region, ".ten.", names.mar, ".it.rds"),
+               paste0(path.mar, region, ".ten.", names.mar, ".pa.rds"))
+types.mar <- rep(names.mar, 2)
 
+names.mar <- c("fac", "cf1")
+files.mar <- paste0(path.mar, region, ".ten.", names.mar, ".itpa.rds")
+types.mar <- names.mar
 
 file.fig.ten <- paste0(path.figures, region, ".ten.png")
 file.data.vis <- paste0(path.data.vis, region, ".ten.rds")
@@ -114,6 +119,35 @@ itpa.lab <-
              pa_type = c(NA, NA, "indirect_use", "direct_use"),
              itpa.label = c("IT, recognized", "IT, not recognized", 
                           "PA, IUCN I-IV", "PA, IUCN V-VI"))
+itpa.lab <- 
+  data.table(it_type = c("recognized", "not_recognized", "none", "none"),
+             pa_type = c("none","none", "indirect_use", "direct_use"),
+             itpa.label = c("IT, recognized", "IT, not recognized", 
+                          "PA, IUCN I-IV", "PA, IUCN V-VI"))
+itpa.lab[, `:=`(
+                it_type = factor(it_type,
+                                 levels = c("none", "recognized", "not_recognized"),
+                                 ordered = TRUE),
+                pa_type = factor(pa_type,
+                                 levels = c("none", "indirect_use", "direct_use"),
+                                 ordered = TRUE),
+                itpa.label = factor(itpa.label, levels = itpa.label))]
+
+
+itpa.lab <- 
+  data.table(it_type = c("recognized", "not_recognized",
+                         "none", "none",
+                         "recognized", "recognized",
+                         "not_recognized", "not_regcongized"),
+             pa_type = c("none","none",
+                         "indirect_use", "direct_use",
+                         "indirect_use", "direct_use",
+                         "indirect_use", "direct_use"),
+             itpa.label = c("IT, recognized", "IT, not recognized", 
+                          "PA, IUCN I-IV", "PA, IUCN V-VI",
+                          "IT, recognized;\nPA, IUCN I-IV", "IT, recognized;\nPA, IUCN V-VI",
+                          "IT, not recognized;\nPA, IUCN I-IV", "IT, not recognized;\nPA, IUCN V-VI"
+                          ))
 itpa.lab[, `:=`(
                 it_type = factor(it_type,
                                  levels = c("none", "recognized", "not_recognized"),
@@ -125,21 +159,21 @@ itpa.lab[, `:=`(
 
 
 
+
 col.div <- diverging_hcl(21, palette = "Purple-Green")
 col.type <- col.div[c(2,5,19,16)]
 names(col.type) <- itpa.labs$itpa.label
 
 
-
 mar.l <-
   lapply(files.mar, readRDS)
-names(mar.l) <- names.mar
+names(mar.l) <- types.mar
 
 mar <-
-  rbindlist(mar.l, idcol = "type") |>
+  rbindlist(mar.l, idcol = "type", fill = TRUE) |>
   merge(year.lab, by = "year") |>
   merge(itpa.lab, by = c("it_type", "pa_type")) |>
-  dcast(year + it_type + pa_type + year.label + itpa.label + .draw ~ type, value.var = "marginal") |>
+  dcast(adm0 + year + it_type + pa_type + year.label + itpa.label + .draw ~ type, value.var = "marginal") |>
   _[, diff := fac-cf1] |>
   melt(measure.vars = c("fac", "cf1", "diff"), variable.name = "type", value.name = "marginal") |>
   merge(type.lab, by = "type")
@@ -151,7 +185,8 @@ setorder(mar, type.label, year.label, itpa.label)
 # fl.bl <- bl[is.na(adm0) & is.na(year), mean(forestloss)]
 
 p.ten <-
-  mar |>
+
+  mar[is.na(adm0)] |>
   ggplot() +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
     stat_pointinterval(aes(y = marginal*100, x = itpa.label, colour = itpa.label),
@@ -159,7 +194,7 @@ p.ten <-
                        interval_size_range = c(0.5, 1.25), 
                        fatten_point = 1.25, shape = 21, fill = "white",
                        .width = c(0.5, 0.95)) +
-    scale_colour_manual(values = col.type) +
+    # scale_colour_manual(values = col.type) +
     coord_cartesian(ylim = c(-0.275, 0.05)) +
     facet_grid(rows = vars(year.label), cols = vars(type.label)) +
     labs(x = NULL, y = "Annual forest loss rate (percent)", colour = NULL) +
@@ -177,7 +212,8 @@ p.ten <-
 
 
 png("../results/figures/fcne_covid_ten.png", width = 7, height = 1.75, unit = "in", res = 600)
-  mar[type == "diff"] |>
+
+  mar[is.na(adm0) & type == "diff"] |>
   ggplot() +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
     stat_pointinterval(aes(y = marginal, x = itpa.label, colour = itpa.label),
@@ -185,7 +221,7 @@ png("../results/figures/fcne_covid_ten.png", width = 7, height = 1.75, unit = "i
                        interval_size_range = c(0.5, 1.25), 
                        fatten_point = 1.25, shape = 21, fill = "white",
                        .width = c(0.5, 0.95)) +
-    scale_colour_manual(values = col.type) +
+    # scale_colour_manual(values = col.type) +
     scale_y_continuous(labels = scales::label_percent()) +
     coord_cartesian(ylim = c(-0.00275, 0.0005)) +
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
@@ -193,6 +229,7 @@ png("../results/figures/fcne_covid_ten.png", width = 7, height = 1.75, unit = "i
          y = "Absolute change in effectivness\n(difference in annual forest loss rate)",
          colour = NULL) +
     plot_theme
+
 dev.off()
 
 

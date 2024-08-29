@@ -17,7 +17,7 @@ region <- tolower(as.character(args[2]))
 
 n.threads <- 4
 region <- "amz"
-overwrite <- FALSE
+overwrite <- TRUE
 
 path.base <- "../"
 path.data <- paste0(path.base, "data/")
@@ -506,12 +506,12 @@ maps[[region]]$diff <-
 
 
 diff.sum.ci <-
-  rbind(geo.sum[[region]]$diff[(diff.q25 < 0 & diff.q75 < 0) | (diff.q25 > 0 & diff.q75 > 0),
+  rbind(geo.sum[[region]]$diff[sign(diff.q25) == sign(diff.q75),
                                .(year.label, ea_east.bin, ea_north.bin, diff.mean,
                                  ci.label = "50% credible interval")],
-        geo.sum[[region]]$diff[(diff.q5 < 0 & diff.q95 < 0) | (diff.q5 > 0 & diff.q95 > 0),
+        geo.sum[[region]]$diff[sign(diff.q2.5) == sign(diff.q97.5),
                                .(year.label, ea_east.bin, ea_north.bin, diff.mean,
-                                 ci.label = "90% credible interval")])
+                                 ci.label = "95% credible interval")])
 diff.sum.ci[, ci.label := factor(ci.label)]
 
 

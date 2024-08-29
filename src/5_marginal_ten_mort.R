@@ -9,7 +9,7 @@ source("utilities.R")
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 resp_type <- tolower(as.character(args[3]))
-pred_type <- tolower(as.character(args[4]))
+mort_type <- tolower(as.character(args[4]))
 area_type <- tolower(as.character(args[5]))
 
 draws.max <- 1000
@@ -25,7 +25,7 @@ draws.eval.chunk <- 10
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
 
-paste0("Settings: ", paste(pred_type, resp_type, area_type, sep = ", ")) |>
+paste0("Settings: ", paste(resp_type, mort_type, area_type, sep = ", ")) |>
 message()
 
 path.base <- "../"
@@ -36,9 +36,9 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, ".rds")
-file.mar <- paste0(path.mar, region, ".", resp_type, ".ten.", pred_type, ".", area_type, ".rds")
-path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
+file.cf <- paste0(path.cf, region, ".ten_", mort_type, ".", area_type, ".rds")
+file.mar <- paste0(path.mar, region, ".", resp_type, ".ten_", mort_type, ".", area_type, ".rds")
+path.arrow <- paste0(path.pred, region, "/", resp_type, "/fac/")
 
 cf <- readRDS(file.cf)
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -46,11 +46,7 @@ pred.ds <- open_dataset(path.arrow, format = "arrow")
 draw.chunks.load <- chunk_seq(1, draws.max, draws.load.chunk)
 group.chunks <- chunk_seq(1, nrow(cf$groups), 100)
 
-if(pred_type == "fac") {
-  id.var <- "id"
-} else {
-  id.var <- "cf.id"
-}
+id.var <- "id"
 
 resp.var <-
   switch(resp_type,
@@ -76,7 +72,7 @@ for(i in seq_along(draw.chunks.load$from)) {
     filter(.draw >= draw.chunks.load$from[i] & .draw <= draw.chunks.load$to[i]) |>
     select(all_of(select.var)) |>
     collect()
- 
+
   pred.draw[, resp.col := as.numeric(resp.col), env = list(resp.col = resp.var)]
 
   draw.chunks.eval <-
@@ -172,3 +168,4 @@ paste0("Saving marginal as ", file.mar, " …") |>
 message()
 
 saveRDS(eval.mar, file.mar)
+

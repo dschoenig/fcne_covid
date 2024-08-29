@@ -209,7 +209,9 @@ p.reg <-
                        fatten_point = 1.25, shape = 21,
                        .width = c(0.5, 0.95),
                        point_fill = "white",
-                       normalize = "panels"
+                       normalize = "panels",
+                       n = 1001,
+                       density = density_bounded(bandwidth = "SJ", bounder = "range", trim = TRUE)
                  ) +
     scale_colour_manual(values = col.type) +
     scale_fill_manual(values = col.type.light,
@@ -220,7 +222,7 @@ p.reg <-
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
     plot_theme
-# p.reg
+p.reg
 
 png(file.fig.reg, width = 7, height = 2.25, unit = "in", res = 600)
 p.reg
@@ -249,8 +251,10 @@ p.adm <-
                        fatten_point = 1.25, shape = 21,
                        .width = c(0.5, 0.95),
                        point_fill = "white",
-                       normalize = "panels"
+                       normalize = "panels",
                        # normalize = "xy"
+                       n = 1001,
+                       density = density_bounded(bandwidth = "SJ", bounder = "range", trim = TRUE)
                  ) +
     scale_colour_manual(values = col.type) +
     scale_fill_manual(values = col.type.light,
@@ -262,7 +266,7 @@ p.adm <-
     facet_grid(rows = vars(reg.label), cols = vars(year.label), scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
     plot_theme
-# p.adm
+p.adm
 
 png(file.fig.adm, width = 7, height = 8, unit = "in", res = 600)
 p.adm
