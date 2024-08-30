@@ -37,11 +37,13 @@ file.data.proc <- paste0(path.data.proc, model.reg, ".data.proc.rds")
 model.name <- paste0(model.reg, ".test.m", model.id, ".", model.resp)
 
 k.reg <- list(amz = c(loc.bl = 1000,
+                      t.bl = 6,
                       loc.itpa = 150,
                       loc.ov = 25,
                       som = 250))
 # Increase number of maximum knots 5-fold (default: 2000)
 max.knots.reg <- list(amz = c(loc.bl = 2e4,
+                              t.bl = NULL,
                               loc.itpa = 2e4,
                               loc.ov = 2e4,
                               som = 2500))
@@ -67,7 +69,7 @@ var.resp <-
 
 vars.mod <-
   c(var.resp,
-    "year",
+    "year", "pandemic",
     "it_type", "pa_type", "overlap",
     "ed_east", "ed_north", "adm0",
     "som_x", "som_y")
@@ -80,66 +82,6 @@ data.mod[,year := factor(year)]
 
 
 # Set up dummy variables
-
-
-dict.dummy <-
-  data.table(it_type = c("none",
-                         "recognized", "not_recognized",
-                         "none", "none",
-                         "recognized", "recognized", 
-                         "not_recognized", "not_recognized"), 
-             pa_type = c("none",
-                         "none", "none",
-                         "indirect_use", "direct_use",
-                         "indirect_use", "direct_use",
-                         "indirect_use", "direct_use"),
-             it_rec = c(0, 1, 0, 0, 0, 1, 1, 0, 0),
-             it_nrec = c(0, 0, 1, 0, 0, 0, 0, 1, 1),
-             pa_ind = c(0, 0, 0, 1, 0, 1, 0, 1, 0),
-             pa_dir = c(0, 0, 0, 0, 1, 0, 1, 0, 1),
-             ov_rec_ind = c(0, 0, 0, 0, 0, 1, 0, 0, 0), 
-             ov_rec_dir = c(0, 0, 0, 0, 0, 0, 1, 0, 0), 
-             ov_nrec_ind = c(0, 0, 0, 0, 0, 0, 0, 1, 0), 
-             ov_nrec_dir = c(0, 0, 0, 0, 0, 0, 0, 0, 1))
-
-dict.dummy[,
-           `:=`(it_type = factor(it_type,
-                                 levels = levels(data.mod$it_type),
-                                 ordered = TRUE),
-                pa_type = factor(pa_type,
-                                 levels = levels(data.mod$pa_type),
-                                 ordered = TRUE))]
-
-d.vars <- c("it_rec", "it_nrec",
-            "pa_dir", "pa_ind",
-           "ov_rec_ind", "ov_rec_dir",
-           "ov_nrec_ind", "ov_nrec_dir")
-
-y.seq <- as.character(2017:2022)
-
-y.dict.dummy.l <- list()
-
-for(i in seq_along(y.seq)) {
-  d.vars.new <- paste0("y", y.seq[i], ".", d.vars)
-  y.dict.dummy.l[[i]] <- copy(dict.dummy)
-  y.dict.dummy.l[[i]][, year := y.seq[i]]
-  setnames(y.dict.dummy.l[[i]], d.vars, d.vars.new)
-}
-
-y.dict.dummy <- rbindlist(y.dict.dummy.l, fill = TRUE)
-d.vars.all <- names(y.dict.dummy[, -c("year", "it_type", "pa_type")])
-
-y.dict.dummy[,
-             (d.vars.all) :=
-             lapply(.SD, \(x) ifelse(is.na(x), 0, x)),
-             .SDcols = d.vars.all]
-y.dict.dummy[, year := factor(year)]
-
-data.mod <-
-  merge(data.mod, y.dict.dummy,
-        by = c("year", "it_type", "pa_type"),
-        sort = FALSE)
-
 
 y.seq <- as.character(2017:2022)
 for(i in seq_along(y.seq)) {
@@ -526,6 +468,176 @@ if(model.id == 5) {
         nthreads = n.threads,
         control = gam.control(trace = TRUE, epsilon = conv.eps))
 }
+
+
+if(model.id == 6) {
+  # Like 2 but with ordered year
+  data.mod[, year := factor(year, ordered = TRUE)]
+  mod.form <-
+    formula(~
+            # Tenure effects, continuous variation over geographic location
+            s(ed_east, ed_north, bs = 'gp',
+              k = k.def$loc.bl*2,
+              xt = list(max.knots = max.knots.def$loc.bl)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = year, k = k.def$loc.bl,
+              xt = list(max.knots = max.knots.def$loc.bl)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2017, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2017, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2018, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2018, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2019, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2019, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2020, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2020, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2021, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2021, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2022, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2022, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            # Covariates
+            s(som_x, som_y, bs = 'gp',
+              k = k.def$som*2,
+              xt = list(max.knots = max.knots.def$som)) +
+            s(som_x, som_y, bs = 'gp',
+              by = year, k = k.def$som,
+              xt = list(max.knots = max.knots.def$som))) |>
+      update(as.formula(paste0(var.resp, "~.")))
+  model <-
+    bam(mod.form,
+        family = binomial(link = "cloglog"),
+        data = data.mod,
+        select = TRUE,
+        discrete = max.discrete.bins,
+        nthreads = n.threads,
+        control = gam.control(trace = TRUE, epsilon = conv.eps))
+}
+
+
+if(model.id == 7) {
+  # Like 2 but with ordered year, SOM only by pandemic
+  data.mod[, year := factor(year, ordered = TRUE)]
+  mod.form <-
+    formula(~
+            # Tenure effects, continuous variation over geographic location
+            s(ed_east, ed_north, bs = 'gp',
+              k = k.def$loc.bl*2,
+              xt = list(max.knots = max.knots.def$loc.bl)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = year, k = k.def$loc.bl,
+              xt = list(max.knots = max.knots.def$loc.bl)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2017, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2017, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2018, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2018, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2019, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2019, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2020, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2020, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2021, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2021, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = it_type_2022, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            s(ed_east, ed_north, bs = 'gp',
+              by = pa_type_2022, k = k.def$loc.itpa,
+              xt = list(max.knots = max.knots.def$loc.itpa)) +
+            # Covariates
+            s(som_x, som_y, bs = 'gp',
+              k = k.def$som*2,
+              xt = list(max.knots = max.knots.def$som)) +
+            s(som_x, som_y, bs = 'gp',
+              by = year, k = k.def$som,
+              xt = list(max.knots = max.knots.def$som))) |>
+      update(as.formula(paste0(var.resp, "~.")))
+  model <-
+    bam(mod.form,
+        family = binomial(link = "cloglog"),
+        data = data.mod,
+        select = TRUE,
+        discrete = max.discrete.bins,
+        nthreads = n.threads,
+        control = gam.control(trace = TRUE, epsilon = conv.eps))
+}
+
+
+if(model.id == 8) {
+  # Oldie model
+  mod.form <-
+    formula( ~
+            # Tenure effects, continuous variation over geographic location
+            te(ed_east, ed_north, year,
+               d = c(2,1), k = c(k.def$loc.bl, k.def$t.bl),
+               xt = list(list(max.knots = max.knots.def$loc.bl),
+                         list(max.knots = max.knots.def$t.bl))) +
+            te(ed_east, ed_north, year, by = it_type,
+               d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+               xt = list(list(max.knots = max.knots.def$loc.itpa),
+                         list(max.knots = max.knots.def$t.bl))) +
+            te(ed_east, ed_north, year, by = pa_type,
+               d = c(2,1), k = c(k.def$loc.itpa, k.def$t.bl),
+               xt = list(list(max.knots = max.knots.def$loc.itpa),
+                         list(max.knots = max.knots.def$t.bl))) +
+            s(som_x, som_y,
+              k = k.def$som*2,
+              xt = list(max.knots.def$som)) + 
+            s(som_x, som_y, by = pandemic,
+              k = k.def$som,
+              xt = list(max.knots.def$som))) |>
+      update(as.formula(paste0(var.resp, "~.")))
+  model <-
+    bam(mod.form,
+        family = binomial(link = "cloglog"),
+        data = data.mod,
+        select = TRUE,
+        discrete = max.discrete.bins,
+        nthreads = n.threads,
+        control = gam.control(trace = TRUE, epsilon = conv.eps))
+}
+
 
 model
 summary(model, re.test = FALSE)
