@@ -15,7 +15,7 @@ path.data.proc <- paste0(path.base, "data/processed/")
 path.mod <- paste0(path.base, "models/gam/")
 path.pred <- paste0(path.mod, "pred/")
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/fac/")
-file.data <- paste0(path.data.proc, region, ".data.fit.proc.rds")
+file.data <- paste0(path.data.proc, region, ".data.proc.rds")
 files.pred <- list.files(path.arrow, ".arrow", full.names = TRUE)
 
 file.res <- paste0(path.mod, region, ".m1.", resp_type, ".res.rds")

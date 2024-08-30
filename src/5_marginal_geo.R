@@ -15,7 +15,7 @@ area_type <- tolower(as.character(args[5]))
 draws.max <- 1000
 draws.load.chunk <- 100
 draws.eval.chunk <- 10
-eval.group.chunk <- 1e4
+eval.group.chunk <- 2.5e3
 
 # n.threads <- 4
 # region <- "amz"
@@ -104,6 +104,8 @@ for(i in seq_along(draw.chunks.load$from)) {
 
     a <- Sys.time()
 
+    message("  Factual …")
+
     eval.fac <-
       egp_evaluate_factual(predictions = pred.draw.j,
                            cf.def = cf,
@@ -117,6 +119,8 @@ for(i in seq_along(draw.chunks.load$from)) {
     silence <- gc()
 
     eval.cf.l <- list()
+
+    message("  Counterfactual …")
 
     for(k in seq_along(group.chunks$from)) {
 
