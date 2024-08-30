@@ -605,6 +605,7 @@ if(model.id == 7) {
 
 
 if(model.id == 8) {
+  data.mod[, year := as.numeric(as.character(year))]
   # Oldie model
   mod.form <-
     formula( ~
