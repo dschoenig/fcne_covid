@@ -124,18 +124,18 @@ silence <- gc()
 
 # Prepare export
 
-pred.mean <- pred[, .(fit.post = mean(resp.col)), by = id.var, env = list(resp.col = var.resp)]
-data.test <- merge(data.pred.sam, pred.mean)
+list(pred = pred, data.pred = data.pred.sam) |>
+saveRDS(file.out)
 
-saveRDS(data.test, file.out)
-
-data.test[order(year),
-          .(mean.obs = mean(disturbance),
-            mean.mod = mean(fit.mod),
-            mean.post = mean(fit.post)),
-          by = .(year)]
-data.test[order(adm0),
-          .(mean.obs = mean(disturbance),
-            mean.mod = mean(fit.mod),
-            mean.post = mean(fit.post)),
-          by = .(adm0)]
+# pred.mean <- pred[, .(fit.post = mean(resp.col)), by = id.var, env = list(resp.col = var.resp)]
+# data.test <- merge(data.pred.sam, pred.mean)
+# data.test[order(year),
+#           .(mean.obs = mean(disturbance),
+#             mean.mod = mean(fit.mod),
+#             mean.post = mean(fit.post)),
+#           by = .(year)]
+# data.test[order(adm0),
+#           .(mean.obs = mean(disturbance),
+#             mean.mod = mean(fit.mod),
+#             mean.post = mean(fit.post)),
+#           by = .(adm0)]
