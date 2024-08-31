@@ -80,6 +80,27 @@ rm(data.proc)
 
 data.mod[,year := factor(year)]
 
+# Set up dummy variables
+
+y.seq <- as.character(2017:2022)
+for(i in seq_along(y.seq)) {
+  y.it <- paste0("it_type_", y.seq[i])
+  y.pa <- paste0("pa_type_", y.seq[i])
+  y.ov <- paste0("overlap_", y.seq[i])
+  it.lev <- levels(data.mod$it_type)
+  pa.lev <- levels(data.mod$pa_type)
+  ov.lev <- levels(data.mod$overlap)
+  data.mod[,
+           `:=`(
+                it.col = factor(fifelse(year == y.seq[i], as.character(it_type), "none"),
+                                levels = it.lev, ordered = TRUE),
+                pa.col = factor(fifelse(year == y.seq[i], as.character(pa_type), "none"),
+                                levels = pa.lev, ordered = TRUE),
+                ov.col = factor(fifelse(year == y.seq[i], as.character(overlap), "none"),
+                                levels = ov.lev, ordered = TRUE)),
+             env = list(it.col = y.it, pa.col = y.pa, ov.col = y.ov)]
+}
+
 
 k.def <- k.reg[[model.reg]]
 max.knots.def <- max.knots.reg[[model.reg]]
