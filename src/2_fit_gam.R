@@ -81,7 +81,6 @@ rm(data.proc)
 data.mod[,year := factor(year)]
 
 # Set up dummy variables
-
 y.seq <- as.character(2017:2022)
 for(i in seq_along(y.seq)) {
   y.it <- paste0("it_type_", y.seq[i])
@@ -208,5 +207,5 @@ print("Saving fitted model …")
 saveRDS(model, paste0(path.gam, model.name, ".rds"))
 
 data.mod[, fitted := fitted(model)]
-data.mod[order(year), .(mean(as.numeric(disturbance)), mean(fitted)), by = .(year)]
-data.mod[, .(mean(as.numeric(disturbance)), mean(fitted)), by = .(adm0)]
+data.mod[order(year), .(mean(as.numeric(resp.col)), mean(fitted)), by = .(year), env = list(resp.col = resp.var)]
+data.mod[, .(mean(as.numeric(resp.col)), mean(fitted)), by = .(adm0), env = list(resp.col = resp.var)]

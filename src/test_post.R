@@ -23,9 +23,9 @@ pred_type <- "fac"
 # pred_type <- "fac"
 
 
-file.model <- paste0(path.gam, region, ".test.m", model_id, ".", model_resp, ".rds")
-file.post <- paste0(path.gam, region, ".test.m",  model_id, ".", model_resp, ".post.rds")
-file.out <- paste0(path.gam, region, ".test.m",  model_id, ".", model_resp, ".pt.rds")
+file.model <- paste0(path.gam, region, ".m", model_id, ".", model_resp, ".rds")
+file.post <- paste0(path.gam, region, ".m",  model_id, ".", model_resp, ".post.rds")
+file.out <- paste0(path.gam, region, ".m",  model_id, ".", model_resp, ".pt.rds")
 
 var.resp <-
   switch(model_resp,
