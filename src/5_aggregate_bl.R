@@ -136,12 +136,13 @@ for(i in seq_along(draw.chunks.load$from)) {
     eval.agg.j[[j]] <-
       merge(pred.draw.agg.j, groups[, ..group.sel],
             all.x = TRUE, all.y = FALSE, by = "group.id")
+
+    b <- Sys.time()
+    print(b-a)
   }
 
   eval.agg.i[[i]] <- rbindlist(eval.agg.j)
 
-  b <- Sys.time()
-  print(b-a)
 
   rm(eval.agg.j, pred.draw)
   gc()
