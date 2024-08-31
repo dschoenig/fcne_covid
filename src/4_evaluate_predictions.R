@@ -70,67 +70,25 @@ rm(data.proc)
 
 data.pred[,year := factor(year)]
 
-
-# Set up dummy variables
-
-
-dict.dummy <-
-  data.table(it_type = c("none",
-                         "recognized", "not_recognized",
-                         "none", "none",
-                         "recognized", "recognized", 
-                         "not_recognized", "not_recognized"), 
-             pa_type = c("none",
-                         "none", "none",
-                         "indirect_use", "direct_use",
-                         "indirect_use", "direct_use",
-                         "indirect_use", "direct_use"),
-             it_rec = c(0, 1, 0, 0, 0, 1, 1, 0, 0),
-             it_nrec = c(0, 0, 1, 0, 0, 0, 0, 1, 1),
-             pa_ind = c(0, 0, 0, 1, 0, 1, 0, 1, 0),
-             pa_dir = c(0, 0, 0, 0, 1, 0, 1, 0, 1),
-             ov_rec_ind = c(0, 0, 0, 0, 0, 1, 0, 0, 0), 
-             ov_rec_dir = c(0, 0, 0, 0, 0, 0, 1, 0, 0), 
-             ov_nrec_ind = c(0, 0, 0, 0, 0, 0, 0, 1, 0), 
-             ov_nrec_dir = c(0, 0, 0, 0, 0, 0, 0, 0, 1))
-
-dict.dummy[,
-           `:=`(it_type = factor(it_type,
-                                 levels = levels(data.pred$it_type),
-                                 ordered = TRUE),
-                pa_type = factor(pa_type,
-                                 levels = levels(data.pred$pa_type),
-                                 ordered = TRUE))]
-
-d.vars <- c("it_rec", "it_nrec",
-            "pa_dir", "pa_ind",
-           "ov_rec_ind", "ov_rec_dir",
-           "ov_nrec_ind", "ov_nrec_dir")
-
 y.seq <- as.character(2017:2022)
-
-y.dict.dummy.l <- list()
-
 for(i in seq_along(y.seq)) {
-  d.vars.new <- paste0("y", y.seq[i], ".", d.vars)
-  y.dict.dummy.l[[i]] <- copy(dict.dummy)
-  y.dict.dummy.l[[i]][, year := y.seq[i]]
-  setnames(y.dict.dummy.l[[i]], d.vars, d.vars.new)
+  y.it <- paste0("it_type_", y.seq[i])
+  y.pa <- paste0("pa_type_", y.seq[i])
+  y.ov <- paste0("overlap_", y.seq[i])
+  it.lev <- levels(data.pred$it_type)
+  pa.lev <- levels(data.pred$pa_type)
+  ov.lev <- levels(data.pred$overlap)
+  data.pred[,
+            `:=`(
+                 it.col = factor(fifelse(year == y.seq[i], as.character(it_type), "none"),
+                                 levels = it.lev, ordered = TRUE),
+                 pa.col = factor(fifelse(year == y.seq[i], as.character(pa_type), "none"),
+                                 levels = pa.lev, ordered = TRUE),
+                 ov.col = factor(fifelse(year == y.seq[i], as.character(overlap), "none"),
+                                 levels = ov.lev, ordered = TRUE)),
+              env = list(it.col = y.it, pa.col = y.pa, ov.col = y.ov)]
 }
 
-y.dict.dummy <- rbindlist(y.dict.dummy.l, fill = TRUE)
-d.vars.all <- names(y.dict.dummy[, -c("year", "it_type", "pa_type")])
-
-y.dict.dummy[,
-             (d.vars.all) :=
-             lapply(.SD, \(x) ifelse(is.na(x), 0, x)),
-             .SDcols = d.vars.all]
-y.dict.dummy[, year := factor(year)]
-
-data.pred <-
-  merge(data.pred, y.dict.dummy,
-        by = c("year", "it_type", "pa_type"),
-        sort = FALSE)
 
 
 # Construct chunk overview
