@@ -36,7 +36,7 @@ post <-
   egp_posterior_draw(model,
                      n = 1000,
                      unconditional = TRUE,
-                     package = "mgcv",
+                     package = "mvnfast",
                      parallel = 4)
 
 saveRDS(post, file.post)
