@@ -45,8 +45,6 @@ path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
 file.agg <- paste0(path.agg, region, ".", resp_type, ".geo.", pred_type, ".rds")
 
-map.res <- 2.5e4
-
 if(pred_type == "fac") {
   id.var <- "id"
   data <-
@@ -61,20 +59,13 @@ if(pred_type == "fac") {
 }
 
 
-map.anchor <- c(ea_east = floor(min(data$ea_east / map.res)) * map.res,
-                ea_north = floor(min(data$ea_north / map.res)) * map.res)
-data <-
-  bin_cols(data,
-           columns = c("ea_east", "ea_north"), bin.res = rep(map.res, 2),
-           bin.min = map.anchor, append = TRUE)
-merge.cols <- c(id.var, "year", "ea_east.bin", "ea_north.bin")
+merge.cols <- c(id.var, "year", "hex")
 data <- data[, ..merge.cols]
 data[, type := factor(pred_type)]
 
 
-group.sel <- c("group.id", "type", "year", "ea_east.bin", "ea_north.bin")
-group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                 c("year", "ea_east.bin", "ea_north.bin"))
+group.sel <- c("group.id", "type", "year", "hex")
+group.by <- list("hex", c("year", "hex"))
 
 
 groups.l <- list()
