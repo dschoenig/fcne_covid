@@ -17,8 +17,6 @@ area_type <- tolower(as.character(args[4]))
 
 setDTthreads(n.threads)
 
-map.res <- 2.5e4
-
 path.base <- "../"
 path.som <- "../models/som/"
 path.data.proc <- paste0(path.base, "data/processed/")
@@ -53,7 +51,7 @@ if(pred_type == "fac") {
 
 var.sel <- c(id.var, "year",
              "it_type", "pa_type",
-             "som_bmu",
+             "som_bmu", "hex",
              "ed_east", "ed_north",
              "ea_east", "ea_north")
 
@@ -65,37 +63,26 @@ data.cf[, year := factor(as.character(year))]
 som.fit <- readRDS(file.som)
 
 
-map.anchor <- c(ea_east = floor(min(data.cf$ea_east / map.res)) * map.res,
-                ea_north = floor(min(data.cf$ea_north / map.res)) * map.res)
-
-data.cf <-
-  bin_cols(data.cf,
-           columns = c("ea_east", "ea_north"), bin.res = rep(map.res, 2),
-           bin.min = map.anchor, append = TRUE)
-
 
 comp.by <- c("year")
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
+  group.by <- list("hex", c("year", "hex"))
                    # c("ea_east.bin", "ea_north.bin", "it_type"),
                    # c("year", "ea_east.bin", "ea_north.bin", "it_type"))
 }
 if(area_type == "pa") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[pa_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
+  group.by <- list("hex", c("year", "hex"))
                    # c("ea_east.bin", "ea_north.bin", "pa_type"),
                    # c("year", "ea_east.bin", "ea_north.bin", "pa_type"))
 }
 if(area_type == "itpa") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none" | pa_type != "none", id.col, env = list(id.col = id.var)]  
-  group.by <- list(c("ea_east.bin", "ea_north.bin"),
-                   c("year", "ea_east.bin", "ea_north.bin"))
+  group.by <- list("hex", c("year", "hex"))
 }
 
 
