@@ -30,6 +30,7 @@ data <-
       mort, mort.id, mortlag1, mortlag1.id,
       ed_east, ed_north,
       ea_east, ea_north,
+      hex,
       som_x, som_y, som_bmu)]
 
 cf.types <- paste0("cf", 1:4)
