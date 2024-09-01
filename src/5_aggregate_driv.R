@@ -18,11 +18,10 @@ draws.eval.chunk <- 10
 
 # n.threads <- 1
 # region <- "amz"
-# resp_type <- "dis"
 # pred_type <- "fac"
-# # draws.max <- 8
-# # draws.load.chunk <- 4
-# # draws.eval.chunk <- 2
+# draws.max <- 8
+# draws.load.chunk <- 4
+# draws.eval.chunk <- 2
 
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
@@ -43,11 +42,14 @@ if(pred_type == "fac") {
 }
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
-file.agg <- paste0(path.agg, region, ".", resp_type, ".geo.year.", pred_type, ".rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".adm.", pred_type, ".rds")
+
 
 if(pred_type == "fac") {
   id.var <- "id"
-  data <- readRDS(file.data)
+  data <-
+    readRDS(file.data) |>
+    _[year >= 2020]
 } else {
   id.var <- "cf.id"
   data <- readRDS(file.data)
@@ -55,16 +57,16 @@ if(pred_type == "fac") {
     data[, year := year.fac]
   }
 }
-
-
-merge.cols <- c(id.var, "year", "hex", "pandemic")
+merge.cols <- c(id.var, "adm0", "year")
 data <- data[, ..merge.cols]
 data[, type := factor(pred_type)]
 
 
-group.sel <- c("group.id", "type", "year", "hex")
-group.by <- list("hex", c("pandemic", "hex"), c("year", "hex"))
-
+group.sel <- c("group.id", "type", "adm0", "year")
+group.by <- list("type",
+                 "adm0",
+                 "year",
+                 c("year", "adm0"))
 
 groups.l <- list()
 for(i in seq_along(group.by)){
@@ -75,12 +77,10 @@ for(i in seq_along(group.by)){
                   add.label = FALSE)
 }
 groups <- rbindlist(groups.l, fill = TRUE)
-
-
 groups[, group.id := 1:nrow(groups)]
 setorder(groups, group.id)
 setcolorder(groups, c("group.id", unique(unlist(group.by))))
-groups[, type := rep(as.factor(pred_type), .N)]
+groups[, type := rep(na.omit(unique(type)), .N)]
 
 
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -158,7 +158,6 @@ for(i in seq_along(draw.chunks.load$from)) {
 
   eval.agg.i[[i]] <- rbindlist(eval.agg.j)
 
-
   rm(eval.agg.j, pred.draw)
   gc()
 }
@@ -166,6 +165,7 @@ for(i in seq_along(draw.chunks.load$from)) {
 eval.agg <- rbindlist(eval.agg.i)
 setcolorder(eval.agg, group.sel)
 setorder(eval.agg, .draw, group.id)
+# eval.agg.fac[is.na(adm0), adm0 := "AMZ"]
 
 print(eval.agg)
 

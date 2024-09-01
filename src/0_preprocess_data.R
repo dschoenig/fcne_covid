@@ -49,9 +49,16 @@ itpa_type_cols <- c(it_type_cols, pa_type_cols)
 vars[, 
      `:=`(
           adm0 = factor(adm0),
-          adm1 = factor(adm1)
-          )
-     ]
+          adm1 = factor(adm1),
+          driver = factor(fcase(is.na(driver), "not_identified",
+                                driver == 1, "commodity",
+                                driver == 2, "shifting_cultivation",
+                                driver == 3, "forestry",
+                                driver == 4, "wildfires",
+                                driver == 5, "urbanization"),
+                          levels = c("not_identified",
+                                     "commodity", "shifting_cultivation",
+                                     "forestry", "wildfires", "urbanization")))]
 vars[,
      (itpa_cols) := lapply(.SD, \(x) fifelse(x == "t", TRUE, FALSE)),
      .SDcols = itpa_cols]
@@ -258,9 +265,10 @@ vars.sel <-
     "dist_set", "dist_roads", "dist_rivers",
     "dens_roads", "dens_pop", "travel_time",
     "mort", "mort.id", "mortlag1", "mortlag1.id",
-    "cabinet",
+    "cabinet", "driver",
     "lon", "lat",
-    "ed_east", "ed_north", "ea_east", "ea_north")
+    "ed_east", "ed_north", "ea_east", "ea_north",
+    "hex")
 
 data.int.all <- data.int.all[, ..vars.sel]
 
