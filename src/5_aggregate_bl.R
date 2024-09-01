@@ -39,9 +39,7 @@ file.agg <- paste0(path.agg, region, ".", resp_type, ".bl.rds")
 
 
 id.var <- "id"
-data <-
-  readRDS(file.data) |>
-  _[year < 2020]
+data <- readRDS(file.data)
 merge.cols <- c(id.var, "adm0", "year")
 data <- data[, ..merge.cols]
 data[, type := "bl"]

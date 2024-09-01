@@ -28,6 +28,7 @@ data <-
       overlap,
       pandemic,
       mort, mort.id, mortlag1, mortlag1.id,
+      driver,
       ed_east, ed_north,
       ea_east, ea_north,
       hex,

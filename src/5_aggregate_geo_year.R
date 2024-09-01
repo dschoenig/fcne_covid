@@ -16,10 +16,10 @@ draws.max <- 1000
 draws.load.chunk <- 100
 draws.eval.chunk <- 10
 
-# n.threads <- 1
-# region <- "amz"
-# resp_type <- "dis"
-# pred_type <- "fac"
+n.threads <- 1
+region <- "amz"
+resp_type <- "dis"
+pred_type <- "fac"
 # # draws.max <- 8
 # # draws.load.chunk <- 4
 # # draws.eval.chunk <- 2
@@ -62,7 +62,7 @@ data <- data[, ..merge.cols]
 data[, type := factor(pred_type)]
 
 
-group.sel <- c("group.id", "type", "year", "hex")
+group.sel <- c("group.id", "type", "pandemic", "year", "hex")
 group.by <- list("hex", c("pandemic", "hex"), c("year", "hex"))
 
 

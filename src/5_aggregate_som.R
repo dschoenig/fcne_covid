@@ -64,8 +64,7 @@ data[, type := factor(pred_type)]
 
 
 group.sel <- c("group.id", "type", "year", "som_x", "som_y")
-group.by <- list(c("som_x", "som_y"),
-                 c("year", "som_x", "som_y"))
+group.by <- list(c("som_x", "som_y"), c("year", "som_x", "som_y"))
 
 
 groups.l <- list()

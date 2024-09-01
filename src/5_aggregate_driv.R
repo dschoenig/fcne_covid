@@ -57,16 +57,13 @@ if(pred_type == "fac") {
     data[, year := year.fac]
   }
 }
-merge.cols <- c(id.var, "adm0", "year")
+merge.cols <- c(id.var, "driver", "year")
 data <- data[, ..merge.cols]
 data[, type := factor(pred_type)]
 
 
-group.sel <- c("group.id", "type", "adm0", "year")
-group.by <- list("type",
-                 "adm0",
-                 "year",
-                 c("year", "adm0"))
+group.sel <- c("group.id", "type", "driver", "year")
+group.by <- list("driver", c("year", "driver"))
 
 groups.l <- list()
 for(i in seq_along(group.by)){
@@ -80,7 +77,7 @@ groups <- rbindlist(groups.l, fill = TRUE)
 groups[, group.id := 1:nrow(groups)]
 setorder(groups, group.id)
 setcolorder(groups, c("group.id", unique(unlist(group.by))))
-groups[, type := rep(na.omit(unique(type)), .N)]
+groups[, type := rep(as.factor(pred_type), .N)]
 
 
 pred.ds <- open_dataset(path.arrow, format = "arrow")
@@ -165,7 +162,6 @@ for(i in seq_along(draw.chunks.load$from)) {
 eval.agg <- rbindlist(eval.agg.i)
 setcolorder(eval.agg, group.sel)
 setorder(eval.agg, .draw, group.id)
-# eval.agg.fac[is.na(adm0), adm0 := "AMZ"]
 
 print(eval.agg)
 
