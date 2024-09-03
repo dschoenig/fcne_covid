@@ -42,7 +42,7 @@ if(pred_type == "fac") {
 }
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
-file.agg <- paste0(path.agg, region, ".", resp_type, ".adm.", pred_type, ".rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".driv.", pred_type, ".rds")
 
 
 if(pred_type == "fac") {
