@@ -31,7 +31,7 @@ file.data.int <- paste0(path.data, region, ".data.int.rds")
 file.prefix.som <- paste0(path.som, region, ".som.")
 
 cov <-
-  c("elevation", "slope", "sx", 
+  c("elevation", "slope", "sx", "cmi_min",
     "dist_set", "dist_roads", "dist_rivers",
     "dens_pop", "dens_roads", "travel_time")
 

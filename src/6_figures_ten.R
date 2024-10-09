@@ -25,16 +25,16 @@ path.figures <- paste0(path.base, "results/figures/")
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
 names.mar <- c("fac", "cf1")
-files.mar <- c(paste0(path.mar, region, ".ten.", names.mar, ".it.rds"),
-               paste0(path.mar, region, ".ten.", names.mar, ".pa.rds"))
+files.mar <- c(paste0(path.mar, region, ".dis.ten.", names.mar, ".it.rds"),
+               paste0(path.mar, region, ".dis.ten.", names.mar, ".pa.rds"))
 types.mar <- rep(names.mar, 2)
 
-names.mar <- c("fac", "cf1")
-files.mar <- paste0(path.mar, region, ".ten.", names.mar, ".itpa.rds")
-types.mar <- names.mar
+# names.mar <- c("fac", "cf1")
+# files.mar <- paste0(path.mar, region, ".dis.ten.", names.mar, ".itpa.rds")
+# types.mar <- names.mar
 
-file.fig.ten <- paste0(path.figures, region, ".ten.png")
-file.data.vis <- paste0(path.data.vis, region, ".ten.rds")
+file.fig.ten <- paste0(path.figures, region, ".dis.ten.png")
+file.data.vis <- paste0(path.data.vis, region, ".dis.ten.rds")
 
 
 base.size <- 7 
@@ -119,11 +119,11 @@ itpa.lab <-
              pa_type = c(NA, NA, "indirect_use", "direct_use"),
              itpa.label = c("IT, recognized", "IT, not recognized", 
                           "PA, IUCN I-IV", "PA, IUCN V-VI"))
-itpa.lab <- 
-  data.table(it_type = c("recognized", "not_recognized", "none", "none"),
-             pa_type = c("none","none", "indirect_use", "direct_use"),
-             itpa.label = c("IT, recognized", "IT, not recognized", 
-                          "PA, IUCN I-IV", "PA, IUCN V-VI"))
+# itpa.lab <- 
+#   data.table(it_type = c("recognized", "not_recognized", "none", "none"),
+#              pa_type = c("none","none", "indirect_use", "direct_use"),
+#              itpa.label = c("IT, recognized", "IT, not recognized", 
+#                           "PA, IUCN I-IV", "PA, IUCN V-VI"))
 itpa.lab[, `:=`(
                 it_type = factor(it_type,
                                  levels = c("none", "recognized", "not_recognized"),
@@ -182,7 +182,7 @@ setorder(mar, type.label, year.label, itpa.label)
 
 # bl <-
 #   readRDS(file.bl)
-# fl.bl <- bl[is.na(adm0) & is.na(year), mean(forestloss)]
+# fl.bl <- bl[is.na(adm0) & is.na(year), mean(disturbance)]
 
 p.ten <-
 
@@ -231,6 +231,8 @@ png("../results/figures/fcne_covid_ten.png", width = 7, height = 1.75, unit = "i
     plot_theme
 
 dev.off()
+
+mar[is.na(adm0) & it_type == "recognized", .(mean(factual), mean(counterfactual)), by = .(year, type)]
 
 
 labs(fill = ,

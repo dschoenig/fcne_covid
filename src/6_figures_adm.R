@@ -24,15 +24,15 @@ path.agg <- paste0(path.base, "models/gam/agg/", region, "/")
 path.figures <- paste0(path.base, "results/figures/")
 if(!dir.exists(path.figures)) dir.create(path.figures, recursive = TRUE)
 
-files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1"), ".rds")
+files.agg <- paste0(path.agg, region, ".dis.adm.", c("fac", "cf1"), ".rds")
 # files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1", "cf2", "cf3", "cf4"), ".rds")
 # files.agg <- paste0(path.agg, region, ".adm.", c("fac", "cf1", "cf2", "cf4"), ".rds")
-file.bl <- paste0(path.agg, region, ".bl.rds")
+file.bl <- paste0(path.agg, region, ".dis.bl.rds")
 
 
-file.fig.reg <- paste0(path.figures, region, ".reg.png")
-file.fig.adm <- paste0(path.figures, region, ".adm.png")
-file.data.vis <- paste0(path.data.vis, region, ".adm.rds")
+file.fig.reg <- paste0(path.figures, region, ".dis.reg.png")
+file.fig.adm <- paste0(path.figures, region, ".dis.adm.png")
+file.data.vis <- paste0(path.data.vis, region, ".dis.adm.rds")
 
 
 
@@ -161,11 +161,11 @@ setorder(agg, type.label, year.label, reg.label)
 
 # bl <-
 #   readRDS(file.bl)
-# fl.bl <- bl[is.na(adm0) & is.na(year), mean(forestloss)]
+# fl.bl <- bl[is.na(adm0) & is.na(year), mean(disturbance)]
 
-fl.bl <- agg[is.na(adm0) & type == "cf1", .(forestloss.bl = mean(forestloss)), by = "year.label"]
+fl.bl <- agg[is.na(adm0) & type == "cf1", .(disturbance.bl = mean(disturbance)), by = "year.label"]
 
-fl.lim <- agg[is.na(adm0), max(forestloss)*100]
+fl.lim <- agg[is.na(adm0), max(disturbance)*100]
 
 # p.adm <-
 #   agg[is.na(adm0)] |>
@@ -173,9 +173,9 @@ fl.lim <- agg[is.na(adm0), max(forestloss)*100]
 #     # geom_hline(yintercept = fl.bl * 100,
 #     #            linetype = "dashed", linewidth = 0.3) +
 #     geom_hline(data = fl.bl,
-#                aes(yintercept = forestloss.bl * 100),
+#                aes(yintercept = disturbance.bl * 100),
 #                linetype = "dashed", linewidth = 0.3) +
-#     stat_pointinterval(aes(y = forestloss*100, x = type.label, colour = type.label),
+#     stat_pointinterval(aes(y = disturbance*100, x = type.label, colour = type.label),
 #                        point_interval = "mean_qi",
 #                        point_size = 1.25,
 #                        interval_size_range = c(0.5, 1.25), 
@@ -197,9 +197,9 @@ p.reg <-
     # geom_hline(yintercept = fl.bl * 100,
     #            linetype = "dashed", linewidth = 0.3) +
     geom_hline(data = fl.bl,
-               aes(yintercept = forestloss.bl * 100),
+               aes(yintercept = disturbance.bl * 100),
                linetype = "dashed", linewidth = 0.3) +
-    stat_halfeye(aes(y = forestloss*100, x = type.label,
+    stat_halfeye(aes(y = disturbance*100, x = type.label,
                      colour = type.label,
                      fill = type.label),
                        scale = 0.5,
@@ -217,7 +217,7 @@ p.reg <-
     scale_fill_manual(values = col.type.light,
                       # guide = guide_legend(override.aes = list(point_fill = NA, colour = NA))) +
                       guide = "none") +
-    coord_cartesian(ylim = c(0.4, fl.lim), expand = TRUE) +
+    coord_cartesian(ylim = c(0.35, fl.lim), expand = TRUE) +
     # coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
     facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
@@ -230,7 +230,7 @@ dev.off()
 
 
 fl.bl.adm <- agg[!is.na(adm0) & type == "cf1",
-                 .(forestloss.bl = mean(forestloss)),
+                 .(disturbance.bl = mean(disturbance)),
                  by = c("year.label", "reg.label")]
 
 p.adm <-
@@ -239,9 +239,9 @@ p.adm <-
     # geom_hline(yintercept = fl.bl * 100,
     #            linetype = "dashed", linewidth = 0.3) +
     geom_hline(data = fl.bl.adm,
-               aes(yintercept = forestloss.bl * 100),
+               aes(yintercept = disturbance.bl * 100),
                linetype = "dashed", linewidth = 0.3) +
-    stat_halfeye(aes(y = forestloss*100, x = type.label,
+    stat_halfeye(aes(y = disturbance*100, x = type.label,
                      colour = type.label,
                      fill = type.label),
                        scale = 0.5,
@@ -273,8 +273,10 @@ p.adm
 dev.off()
 
 
-# merge(agg[is.na(adm0) & year > 2020 & type == "cf1", .(bl = mean(forestloss)), by = "year"],
-#       agg[is.na(adm0) & year > 2020 & type == "fac", .(lossrate = mean(forestloss)), by = "year"]) |>
+# merge(agg[is.na(adm0) & year > 2020 & type == "cf1", .(bl =
+# mean(disturbance)), by = "year"],
+#       agg[is.na(adm0) & year > 2020 & type == "fac", .(lossrate =
+#       mean(disturbance)), by = "year"]) |>
 # _[, .(lossyear = year, lossrate.diff = lossrate - bl, lossrate.diff.rel = (lossrate-bl)/bl)]
 
 

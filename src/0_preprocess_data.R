@@ -261,7 +261,7 @@ vars.sel <-
     "pa_2020", "pa_2021", "pa_2022",
     "pa_type_2017", "pa_type_2018", "pa_type_2019",
     "pa_type_2020", "pa_type_2021", "pa_type_2022",
-    "elevation", "slope", "sx",
+    "elevation", "slope", "sx", "cmi_min",
     "dist_set", "dist_roads", "dist_rivers",
     "dens_roads", "dens_pop", "travel_time",
     "mort", "mort.id", "mortlag1", "mortlag1.id",
