@@ -50,6 +50,15 @@ if(pred_type == "fac") {
   }
 }
 
+# Establish geographic range for comparisons (using entire study region)
+pts.bb <-
+  st_multipoint(x = as.matrix(data[, .(ed_east, ed_north)]), dim = "XY") |>
+  st_minimum_bounding_circle() |>
+  st_bbox()
+geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
+rm(pts.bb)
+
+silence <- gc()
 var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
              "som_bmu", "ed_east", "ed_north")

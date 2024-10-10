@@ -35,6 +35,16 @@ file.out <- paste0(path.cf, region, ".ten_", mort_type, ".", area_type, ".rds")
 
 data <- readRDS(file.data)
 
+# Establish geographic range for comparisons (using entire study region)
+pts.bb <-
+  st_multipoint(x = as.matrix(data[, .(ed_east, ed_north)]), dim = "XY") |>
+  st_minimum_bounding_circle() |>
+  st_bbox()
+geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
+rm(pts.bb)
+silence <- gc()
+
+
 var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
              "mort", "mortlag1", "pandemic",

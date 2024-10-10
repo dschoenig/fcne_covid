@@ -34,8 +34,16 @@ var.sel <- c(id.var, "year",
              "som_bmu", "ed_east", "ed_north")
 
 data.cf <- readRDS(file.data)[, ..var.sel]
-
 som.fit <- readRDS(file.som)
+
+# Establish geographic range for comparisons (using entire study region)
+pts.bb <-
+  st_multipoint(x = as.matrix(data[, .(ed_east, ed_north)]), dim = "XY") |>
+  st_minimum_bounding_circle() |>
+  st_bbox()
+geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
+rm(pts.bb)
+silence <- gc()
 
 
 mort.breaks <- data.cf[, quantile(unique(mort), c(0, 0.2, 0.4, 0.6, 0.8, 1))]
