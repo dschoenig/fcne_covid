@@ -205,7 +205,3 @@ AIC(model)
 
 print("Saving fitted model …")
 saveRDS(model, paste0(path.gam, model.name, ".rds"))
-
-data.mod[, fitted := fitted(model)]
-data.mod[order(year), .(mean(as.numeric(resp.col)), mean(fitted)), by = .(year), env = list(resp.col = resp.var)]
-data.mod[, .(mean(as.numeric(resp.col)), mean(fitted)), by = .(adm0), env = list(resp.col = resp.var)]
