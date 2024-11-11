@@ -1,0 +1,35 @@
+# Done
+
+sbatch cc_4_evaluate_predictions_AMZ_dis_cf1.sh
+sbatch cc_4_evaluate_predictions_AMZ_dis_fac.sh
+
+sbatch cc_4_counterfactual_covid_AMZ.sh
+sbatch cc_4_counterfactual_geo_AMZ.sh
+sbatch cc_4_counterfactual_ten_AMZ.sh
+sbatch cc_4_counterfactual_ten_mort_AMZ.sh
+
+# Running
+
+
+# To run
+
+sbatch cc_5_aggregate_bl_AMZ_dis.sh
+sbatch cc_5_aggregate_adm_AMZ_dis_cf1.sh
+sbatch cc_5_aggregate_adm_AMZ_dis_fac.sh
+sbatch cc_5_aggregate_geo_AMZ_dis_cf1.sh
+sbatch cc_5_aggregate_geo_AMZ_dis_fac.sh
+sbatch cc_5_aggregate_geo_year_AMZ_dis.sh
+sbatch cc_5_aggregate_som_AMZ_dis_cf1.sh
+sbatch cc_5_aggregate_som_AMZ_dis_fac.sh
+
+sbatch cc_5_marginal_geo_fac_AMZ_dis.sh
+sbatch cc_5_marginal_geo_cf1_AMZ_dis.sh
+sbatch cc_5_marginal_ten_fac_AMZ_dis.sh
+sbatch cc_5_marginal_ten_cf1_AMZ_dis.sh
+sbatch cc_5_marginal_ten_mort_AMZ_dis.sh
+sbatch cc_5_marginal_ten_mortlag1_AMZ_dis.sh
+sbatch cc_5_marginal_covid_mort_AMZ_dis.sh
+sbatch cc_5_marginal_covid_mortlag1_AMZ_dis.sh
+
+sbatch cc_5_residuals_AMZ.sh
+sbatch cc_5_sample_sizes.sh

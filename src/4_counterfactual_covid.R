@@ -8,9 +8,9 @@ n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
 
-n.threads <- 4
-region <- "amz"
-pred_type <- "mort"
+# n.threads <- 4
+# region <- "amz"
+# pred_type <- "mort"
 
 setDTthreads(n.threads)
 
