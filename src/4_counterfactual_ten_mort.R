@@ -74,7 +74,7 @@ data.cf[pandemic == "no", (cols.mort.class) := NA]
 # data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
 mort.col <- paste0(mort_type, ".class")
-comp.by <- c("year", mort.col)
+comp.by <- c("year", "adm0", mort.col)
 
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]

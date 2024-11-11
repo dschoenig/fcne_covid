@@ -28,7 +28,7 @@ file.out <- paste0(path.cf, region, ".covid.", pred_type, ".rds")
 
 
 id.var <- "id"
-var.sel <- c(id.var, "year",
+var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type", "pandemic",
              "mort", "mortlag1",
              "som_bmu", "ed_east", "ed_north")
@@ -71,7 +71,7 @@ if(pred_type == "mortlag1") {
 }
 
 mort.col <- paste0(pred_type, ".class")
-comp.by <- c("it_type", "pa_type")
+comp.by <- c("it_type", "pa_type", "adm0")
 group.by <- list(mort.col, c("year", mort.col))
 
 

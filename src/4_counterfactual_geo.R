@@ -58,7 +58,7 @@ geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
 rm(pts.bb)
 silence <- gc()
 
-var.sel <- c(id.var, "year",
+var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
              "som_bmu", "hex",
              "ed_east", "ed_north",
@@ -72,7 +72,7 @@ data.cf[, year := factor(as.character(year))]
 som.fit <- readRDS(file.som)
 
 
-comp.by <- c("year")
+comp.by <- c("year", "adm0")
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
   fac.ids <- data.cf[it_type != "none", id.col, env = list(id.col = id.var)]  

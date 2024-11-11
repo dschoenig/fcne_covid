@@ -72,7 +72,7 @@ som.fit <- readRDS(file.som)
 
 # data.cf <- data.cf[sample(1:nrow(data.cf), 1e5)]
 
-comp.by <- c("year")
+comp.by <- c("year", "adm0")
 
 if(area_type == "it") {
   cf.ids <- data.cf[it_type == "none" & pa_type == "none", id.col, env = list(id.col = id.var)]
