@@ -8,9 +8,9 @@ n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
 
-# n.threads <- 4
-# region <- "amz"
-# pred_type <- "mort"
+n.threads <- 4
+region <- "amz"
+pred_type <- "mort"
 
 setDTthreads(n.threads)
 
@@ -38,7 +38,7 @@ som.fit <- readRDS(file.som)
 
 # Establish geographic range for comparisons (using entire study region)
 pts.bb <-
-  st_multipoint(x = as.matrix(data[, .(ed_east, ed_north)]), dim = "XY") |>
+  st_multipoint(x = as.matrix(data.cf[, .(ed_east, ed_north)]), dim = "XY") |>
   st_minimum_bounding_circle() |>
   st_bbox()
 geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
