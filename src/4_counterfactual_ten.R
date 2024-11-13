@@ -43,7 +43,7 @@ if(pred_type == "fac") {
 }
 
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, dr.suf, ".rds")
+file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, dr_suf, ".rds")
 
 
 if(pred_type == "fac") {
