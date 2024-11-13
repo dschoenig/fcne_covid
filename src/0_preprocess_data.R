@@ -2,9 +2,10 @@ args <- commandArgs(trailingOnly = TRUE)
 
 library(data.table)
 library(sf)
+source("utilities.R")
 
 region <- tolower(as.character(args[1]))
-region <- "amz"
+# region <- "amz"
 
 ## Folders
 path.base <- "../"
@@ -24,11 +25,13 @@ if(!dir.exists(path.proc)){
 
 
 file.data.raw <- paste0(path.fl, region, ".1722.vars.csv")
+file.data.df <- paste0(path.fl, region, ".1722.df.csv")
 file.stats <- paste0(path.fl, region, ".sumstats_1722.csv")
 file.covid.adm1 <- paste0(path.cv, region, ".covid_mort.adm1.gpkg")
 file.cabinets <- paste0(path.raw, region, ".cabinets.csv")
 
 file.data.int <- paste0(path.int, region, ".data.int.rds")
+file.df.proc <- paste0(path.proc, region, ".df.proc.rds")
 file.stats.proc <- paste0(path.proc, region, ".sumstats.proc.rds")
 
 
@@ -243,6 +246,46 @@ data.int.all[,
 
 setkey(data.int.all, id)
 
+rm(data.int)
+gc()
+
+
+# Process drough and fire data
+
+# data.int.all <- readRDS(file.data.int)
+data.df <-
+  fread(file.data.df, na.strings = "", key = "id") |>
+  _[data.int.all[, .(id)], on = "id"]
+
+fire_cols <- paste0("fire_", 2017:2022)
+di_cols <- paste0("di12_", 2017:2022)
+
+data.df[,
+        (fire_cols) := lapply(.SD, \(x) fifelse(x == "t", TRUE, FALSE)),
+        .SDcols = fire_cols]
+
+data.df[, fire := apply(.SD, 1, any), .SDcols = fire_cols]
+data.df[, di12_min := apply(.SD, 1, min, na.rm = TRUE), .SDcols = di_cols]
+
+# Flag severe and extreme drought over 12 months
+data.df[, `:=`(drought_mod = FALSE,
+               drought_sev = FALSE)]
+data.df[di12_min <= -1, drought_mod := TRUE]
+data.df[di12_min <= -1.5, drought_sev := TRUE]
+
+saveRDS(data.df, file.df.proc)
+
+
+data.int.all <- merge(data.int.all, data.df[, .(id, fire, drought_mod, drought_sev)])
+
+
+# dis.mean <- data.int.all[year < 2020, mean(disturbance)]
+# data.int.all[year >= 2020, .(disturbance = mean(disturbance), dis.mean = dis.mean), by = year] |>
+# _[, .(year, dis.diff = disturbance - dis.mean)]
+# dis.mean <- data.int.all[year < 2020 & drought_sev == FALSE, mean(disturbance)]
+# data.int.all[year >= 2020 & drought_sev == FALSE, .(disturbance = mean(disturbance), dis.mean = dis.mean), by = year] |>
+# _[, .(year, dis.diff = disturbance - dis.mean)]
+
 
 # Prepare export
 
@@ -251,6 +294,7 @@ vars.sel <-
     "pandemic",
     "adm0", "adm1",
     "disturbance", "deforestation", "degradation",
+    "drought_mod", "drought_sev", "fire",
     "tmf_def", "tmf_deg",
     "it", "it_type", "pa", "pa_type", "overlap",
     "it_2017", "it_2018", "it_2019",
@@ -273,8 +317,6 @@ vars.sel <-
 data.int.all <- data.int.all[, ..vars.sel]
 
 saveRDS(data.int.all, file.data.int)
-
-rm(data.int)
 
 
 # Process data for summary statistics

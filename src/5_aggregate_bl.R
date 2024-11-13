@@ -9,19 +9,29 @@ source("utilities.R")
 n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 resp_type <- tolower(as.character(args[3]))
+dr_type <- tolower(as.character(args[4]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
 draws.eval.chunk <- 10
 
-# n.threads <- 1
-# region <- "amz"
-# draws.max <- 8
-# draws.load.chunk <- 4
-# draws.eval.chunk <- 2
+n.threads <- 1
+region <- "amz"
+draws.max <- 8
+draws.load.chunk <- 4
+draws.eval.chunk <- 2
 
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
+
+if(is.na(dr_type)) {
+  dr_type <- "drought"
+}
+if(dr_type == "no_drought") {
+  dr_suf <- ".no_drought"
+} else {
+  dr_suf <- ""
+}
 
 
 path.base <- "../"
@@ -35,11 +45,19 @@ if(!dir.exists(path.agg))
 file.data <- paste0(path.data.proc, region, ".data.proc.rds")
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/fac/")
 
-file.agg <- paste0(path.agg, region, ".", resp_type, ".bl.rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".bl", dr_suf, ".rds")
 
 
 id.var <- "id"
 data <- readRDS(file.data)
+
+
+if(dr_type == "no_drought") {
+  data <- data[drought_mod == FALSE]
+}
+
+
+
 merge.cols <- c(id.var, "adm0", "year")
 data <- data[, ..merge.cols]
 data[, type := "bl"]

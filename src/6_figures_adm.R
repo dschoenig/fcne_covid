@@ -219,7 +219,7 @@ p.reg <-
                       guide = "none") +
     coord_cartesian(ylim = c(0.35, fl.lim), expand = TRUE) +
     # coord_cartesian(ylim = c(0, 1.5), expand = FALSE) +
-    facet_wrap(vars(year.label), nrow = 1, scales = "free_y") +
+    facet_grid(cols = vars(year.label), scales = "free_y") +
     labs(x = NULL, y = "Yearly forest loss rate (percent)", colour = NULL) +
     plot_theme
 p.reg

@@ -11,6 +11,7 @@ region <- tolower(as.character(args[2]))
 resp_type <- tolower(as.character(args[3]))
 pred_type <- tolower(as.character(args[4]))
 area_type <- tolower(as.character(args[5]))
+dr_type <- tolower(as.character(args[6]))
 
 draws.max <- 1000
 draws.load.chunk <- 100
@@ -25,6 +26,16 @@ draws.eval.chunk <- 10
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
 
+if(is.na(dr_type)) {
+  dr_type <- "drought"
+}
+if(dr_type == "no_drought") {
+  dr_suf <- ".no_drought"
+} else {
+  dr_suf <- ""
+}
+
+
 paste0("Settings: ", paste(pred_type, resp_type, area_type, sep = ", ")) |>
 message()
 
@@ -36,8 +47,8 @@ path.cf <- paste0(path.base, "models/egp_cf/", region, "/")
 path.mar <- paste0(path.base, "models/marginal/", region, "/")
 if(!dir.exists(path.mar))
   dir.create(path.mar, recursive = TRUE)
-file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, ".rds")
-file.mar <- paste0(path.mar, region, ".", resp_type, ".ten.", pred_type, ".", area_type, ".rds")
+file.cf <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, dr_suf, ".rds")
+file.mar <- paste0(path.mar, region, ".", resp_type, ".ten.", pred_type, ".", area_type, dr_suf, ".rds")
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
 cf <- readRDS(file.cf)

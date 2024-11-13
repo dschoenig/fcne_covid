@@ -8,14 +8,23 @@ n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 pred_type <- tolower(as.character(args[3]))
 area_type <- tolower(as.character(args[4]))
+dr_type <- tolower(as.character(args[5]))
 
 # n.threads <- 4
 # region <- "amz"
 # pred_type <- "fac"
 # area_type <- "itpa"
 
-
 setDTthreads(n.threads)
+
+if(is.na(dr_type)) {
+  dr_type <- "drought"
+}
+if(dr_type == "no_drought") {
+  dr_suf <- ".no_drought"
+} else {
+  dr_suf <- ""
+}
 
 
 path.base <- "../"
@@ -34,7 +43,7 @@ if(pred_type == "fac") {
 }
 
 file.som <- paste0(path.som, region, ".som.1e6.rds")
-file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, ".rds")
+file.out <- paste0(path.cf, region, ".ten.", pred_type, ".", area_type, dr.suf, ".rds")
 
 
 if(pred_type == "fac") {
@@ -57,8 +66,14 @@ pts.bb <-
   st_bbox()
 geo.range <- pts.bb[["xmax"]] - pts.bb[["xmin"]]
 rm(pts.bb)
-
 silence <- gc()
+
+
+if(dr_type == "no_drought") {
+  data <- data[drought_mod == FALSE]
+}
+
+
 var.sel <- c(id.var, "year", "adm0",
              "it_type", "pa_type",
              "som_bmu", "ed_east", "ed_north")

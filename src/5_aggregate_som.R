@@ -10,6 +10,7 @@ n.threads <- as.integer(args[1])
 region <- tolower(as.character(args[2]))
 resp_type <- tolower(as.character(args[3]))
 pred_type <- as.character(args[4])
+dr_type <- tolower(as.character(args[5]))
 
 
 draws.max <- 1000
@@ -25,6 +26,15 @@ draws.eval.chunk <- 10
 
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
+
+if(is.na(dr_type)) {
+  dr_type <- "drought"
+}
+if(dr_type == "no_drought") {
+  dr_suf <- ".no_drought"
+} else {
+  dr_suf <- ""
+}
 
 
 path.base <- "../"
@@ -42,7 +52,7 @@ if(pred_type == "fac") {
 }
 path.arrow <- paste0(path.pred, region, "/", resp_type, "/", pred_type, "/")
 
-file.agg <- paste0(path.agg, region, ".", resp_type, ".som.", pred_type, ".rds")
+file.agg <- paste0(path.agg, region, ".", resp_type, ".som.", pred_type, dr_suf, ".rds")
 
 
 if(pred_type == "fac") {
@@ -56,6 +66,10 @@ if(pred_type == "fac") {
   if(pred_type %in% c("cf1", "cf4")) {
     data[, year := year.fac]
   }
+}
+
+if(dr_type == "no_drought") {
+  data <- data[drought_mod == FALSE]
 }
 
 merge.cols <- c(id.var, "year", "som_x", "som_y")
