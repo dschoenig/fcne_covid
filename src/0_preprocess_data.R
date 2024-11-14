@@ -250,13 +250,15 @@ rm(data.int)
 gc()
 
 
-# Process drough and fire data
+# Process drought and fire data
 
 # data.int.all <- readRDS(file.data.int)
 data.df <-
   fread(file.data.df, na.strings = "", key = "id") |>
   _[data.int.all[, .(id)], on = "id"]
 
+
+y.seq <- 2017:2022
 fire_cols <- paste0("fire_", 2017:2022)
 di_cols <- paste0("di12_", 2017:2022)
 
@@ -264,27 +266,23 @@ data.df[,
         (fire_cols) := lapply(.SD, \(x) fifelse(x == "t", TRUE, FALSE)),
         .SDcols = fire_cols]
 
-data.df[, fire := apply(.SD, 1, any), .SDcols = fire_cols]
-data.df[, di12_min := apply(.SD, 1, min, na.rm = TRUE), .SDcols = di_cols]
-
-# Flag severe and extreme drought over 12 months
-data.df[, `:=`(drought_mod = FALSE,
-               drought_sev = FALSE)]
-data.df[di12_min <= -1, drought_mod := TRUE]
-data.df[di12_min <= -1.5, drought_sev := TRUE]
 
 saveRDS(data.df, file.df.proc)
 
+data.int.all <- merge(data.int.all, data.df)
 
-data.int.all <- merge(data.int.all, data.df[, .(id, fire, drought_mod, drought_sev)])
+for(i in seq_along(y.seq)) {
+  fire.y <- fire_cols[i]
+  di.y <- di_cols[i]
+  data.int.all[year == y.seq[i],
+               `:=`(fire = fire.col,
+                    drought_mod = fifelse(di.col <= -1, TRUE, FALSE),
+                    drought_sev = fifelse(di.col <= -1.5, TRUE, FALSE)),
+                env = list(fire.col = fire.y,
+                           di.col = di.y)]
+}
 
 
-# dis.mean <- data.int.all[year < 2020, mean(disturbance)]
-# data.int.all[year >= 2020, .(disturbance = mean(disturbance), dis.mean = dis.mean), by = year] |>
-# _[, .(year, dis.diff = disturbance - dis.mean)]
-# dis.mean <- data.int.all[year < 2020 & drought_sev == FALSE, mean(disturbance)]
-# data.int.all[year >= 2020 & drought_sev == FALSE, .(disturbance = mean(disturbance), dis.mean = dis.mean), by = year] |>
-# _[, .(year, dis.diff = disturbance - dis.mean)]
 
 
 # Prepare export
@@ -294,7 +292,6 @@ vars.sel <-
     "pandemic",
     "adm0", "adm1",
     "disturbance", "deforestation", "degradation",
-    "drought_mod", "drought_sev", "fire",
     "tmf_def", "tmf_deg",
     "it", "it_type", "pa", "pa_type", "overlap",
     "it_2017", "it_2018", "it_2019",
@@ -305,6 +302,11 @@ vars.sel <-
     "pa_2020", "pa_2021", "pa_2022",
     "pa_type_2017", "pa_type_2018", "pa_type_2019",
     "pa_type_2020", "pa_type_2021", "pa_type_2022",
+    "drought_mod", "drought_sev", "fire",
+    "di12_2017", "di12_2018", "di12_2019",
+    "di12_2020", "di12_2021", "di12_2022",
+    "fire_2017", "fire_2018", "fire_2019",
+    "fire_2020", "fire_2021", "fire_2022",
     "elevation", "slope", "sx", "cmi_min",
     "dist_set", "dist_roads", "dist_rivers",
     "dens_roads", "dens_pop", "travel_time",
