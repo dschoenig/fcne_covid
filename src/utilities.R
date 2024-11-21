@@ -45,6 +45,19 @@ bin_cols <- function(data, columns, bin.res, bin.min = NULL, bin.round = NULL, b
 
 ## GENERAL HELPERS ##############################################################
 
+
+hdci2 <- function(x,
+                  .width = 0.90,
+                  var.name = "",
+                  prefix = "hdi",
+                  suffix = c("l", "u"), ...) {
+  hint <- as.list(ggdist::hdci(x = x, .width = .width))
+  var.names <- paste0(var.name, prefix, .width*100, suffix)
+  names(hint) <- var.names
+  return(hint)
+}
+
+
 posterior_summary <- function(x,
                               probs = c(0.05, 0.95),
                               prefix = NULL,
@@ -66,6 +79,87 @@ posterior_summary <- function(x,
     c(list(point.fun(x)),
       as.list(quantile(x, probs = probs, names = FALSE, ...)))
   names(y) <- sum.names
+  return(y)
+}
+
+
+model_summary <- function(model,
+                          post) {
+
+  if(is.null(colnames(post))) {
+    colnames(post) <- names(coef(model))
+  }
+
+  sp.est <- model$sp
+  lsp.var <- diag(sp.vcov(model))
+  if(length(lsp.var) > length(sp.est)) {
+    lsp.var <- lsp.var[1:length(sp.est)]
+    log.scale.var <- lsp.var[length(lsp.var)]
+  } else {
+    log.scale.var <- NA
+  }
+  names(lsp.var) <- names(sp.est)
+
+  lsp.tab <- data.table(sp.label = names(sp.est), lsp.est = log(sp.est), lsp.var = lsp.var)
+
+  n.sm <- length(model$smooth)
+
+  sm.tab.l <- list()
+  all.para.sm <- list()
+
+  for(i in 1:n.sm) {
+    para.range <- with(model$smooth[[i]], first.para:last.para)
+    sp.range <- with(model$smooth[[i]], first.sp:last.sp)
+    label <- model$smooth[[i]]$label
+    sp.labels <- names(model$smooth[[i]]$sp)
+    k <- model$smooth[[i]]$bs.dim
+    kp <- length(para.range)
+    edf <- sum(model$edf[para.range])
+    sp.id <- paste0("lambda", 0:(length(sp.labels)-1))
+    sm.tab.l[[i]] <-
+      data.table(sm.id = i,
+                 sm.label = label,
+                 sm.k = k,
+                 sm.kp = kp,
+                 sm.edf = edf,
+                 sp.id,
+                 sp.label = sp.labels)
+    all.para.sm[[i]] <- para.range
+  }
+
+  sm.tab <-
+    rbindlist(sm.tab.l) |>
+    merge(lsp.tab, sort = FALSE) |>
+    dcast(sm.id + sm.label + sm.k + sm.kp + sm.edf ~ sp.id,
+          value.var = c("lsp.est", "lsp.var"), sep = ".", sort = FALSE)
+
+  pars.idx <- 1:ncol(post)
+  p.sel <- pars.idx[!pars.idx %in% unlist(all.para.sm)]
+  post.p <- post[, p.sel , drop = FALSE]
+  p.est <- apply(post.p, 2, mean)
+  p.var <- apply(post.p, 2, var)
+  p.tab <-
+    data.table(p.id = p.sel,
+               p.label = names(p.est),
+               p.est = p.est,
+               p.var = p.var)
+
+  return(list(p.terms = p.tab,
+              sm.terms = sm.tab,
+              scale.est = model$sig2,
+              log.scale.var = log.scale.var,
+              n = nobs(model),
+              dev.expl = with(model, (null.deviance - deviance) / null.deviance),
+              aic = AIC(model)))
+
+  }
+
+fill_na_empty <- function(x, empty = "") {
+  if(!is.character(x)) {
+    x <- as.character(x)
+  }
+  y <- x
+  y[is.na(x) | x == "NA"] <- empty
   return(y)
 }
 

@@ -5,7 +5,7 @@ library(sf)
 source("utilities.R")
 
 region <- tolower(as.character(args[1]))
-# region <- "amz"
+region <- "amz"
 
 ## Folders
 path.base <- "../"
@@ -325,7 +325,8 @@ saveRDS(data.int.all, file.data.int)
 
 stats <- fread(file.stats, na.strings = "", key = "id")
 
-y.seq <- c(2017, 2022)
+# y.seq <- c(2017, 2022)
+y.seq <- 2017:2022
 it_cols <- paste0("it_", y.seq)
 it_type_cols <- paste0("it_type_", y.seq)
 pa_cols <- paste0("pa_", y.seq)
@@ -365,7 +366,7 @@ stats.sel <-
     "tmf_annual_1990", "tmf_annual_2016", "tmf_annual_2022",
     "tmf_def", "tmf_deg",
     it_cols, it_type_cols, pa_cols, pa_type_cols,
-    "ea_east", "ea_north")
+    "ea_east", "ea_north", "hex")
 
 stats <- stats[, ..stats.sel]
 

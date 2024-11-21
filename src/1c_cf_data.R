@@ -7,7 +7,7 @@ path.base <- "../"
 path.data.proc <- paste0(path.base, "data/processed/")
 
 region <- tolower(as.character(args[1]))
-# region <- "amz"
+region <- "amz"
 
 file.data.proc <- paste0(path.data.proc, region, ".data.proc.rds")
 file.data.cf1 <- paste0(path.data.proc, region, ".data.cf1.rds")
@@ -19,7 +19,6 @@ data <-
   _[,
     .(year,
       adm0,
-      drought_mod, drought_sev, fire,
       it_type,
       it_type_2017, it_type_2018, it_type_2019,
       it_type_2020, it_type_2021, it_type_2022,
@@ -40,7 +39,7 @@ data <-
       hex,
       som_x, som_y, som_bmu)]
 
-cf.types <- paste0("cf", 1:4)
+cf.types <- paste0("cf", 1)
 
 
 data.pan <- data[pandemic == "yes"]
