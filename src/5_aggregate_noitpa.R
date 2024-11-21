@@ -14,11 +14,11 @@ draws.max <- 1000
 draws.load.chunk <- 100
 draws.eval.chunk <- 10
 
-n.threads <- 1
-region <- "amz"
-draws.max <- 8
-draws.load.chunk <- 4
-draws.eval.chunk <- 2
+# n.threads <- 1
+# region <- "amz"
+# draws.max <- 8
+# draws.load.chunk <- 4
+# draws.eval.chunk <- 2
 
 setDTthreads(n.threads)
 set_cpu_count(n.threads)
