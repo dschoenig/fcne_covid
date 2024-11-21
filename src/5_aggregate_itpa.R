@@ -39,7 +39,7 @@ file.agg <- paste0(path.agg, region, ".", resp_type, ".itpa.rds")
 
 id.var <- "id"
 data <- readRDS(file.data)
-data <- data[it_type != "none" & pa_type != "none"]
+data <- data[it_type != "none" | pa_type != "none"]
 
 merge.cols <- c(id.var, "it_type", "pa_type", "year")
 data <- data[, ..merge.cols]
