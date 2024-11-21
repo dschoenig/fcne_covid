@@ -7,7 +7,7 @@ path.base <- "../"
 path.data.proc <- paste0(path.base, "data/processed/")
 
 region <- tolower(as.character(args[1]))
-region <- "amz"
+# region <- "amz"
 
 file.data.proc <- paste0(path.data.proc, region, ".data.proc.rds")
 file.data.cf1 <- paste0(path.data.proc, region, ".data.cf1.rds")
@@ -17,7 +17,8 @@ file.data.cf1 <- paste0(path.data.proc, region, ".data.cf1.rds")
 data <-
   readRDS(file.data.proc) |>
   _[,
-    .(year,
+    .(fac.id = id,
+      year,
       adm0,
       it_type,
       it_type_2017, it_type_2018, it_type_2019,

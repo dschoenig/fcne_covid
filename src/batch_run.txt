@@ -11,14 +11,15 @@ sbatch cc_4_counterfactual_ten_mort_AMZ.sh
 # Running
 
 
-# To run
-
 sbatch cc_5_aggregate_adm_AMZ_dis_fac_no_drought.sh
 sbatch cc_5_aggregate_som_AMZ_dis_fac_no_drought.sh
-
 sbatch cc_5_aggregate_adm_AMZ_dis_cf1_no_drought.sh
 sbatch cc_5_aggregate_som_AMZ_dis_cf1_no_drought.sh
 sbatch cc_4_counterfactual_ten_AMZ_no_drought.sh
+
+
+# To run
+
 
 sbatch cc_5_marginal_ten_cf1_AMZ_dis_no_drought.sh
 sbatch cc_5_marginal_ten_fac_AMZ_dis_no_drought.sh
